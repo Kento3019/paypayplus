@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables (secrets)
+.env
+.env.local
+.env.*.local
+
+# Local Claude Code settings
+.claude/settings.local.json
+
+# Test artifacts
+test-results/
+specs_test/
+specs/screenshots/
+specs/*.json
+specs/*.cjs
+specs/*.png
+specs/*.ts
+specs/sprint-*.md
+
+# Root-level temporary test/eval scripts
+sprint5-eval.test.ts
+sprint6-eval.test.ts
+test-sprint7.cjs
+test-sprint7-v2.cjs
+test-sprint7-v3.cjs
+test-sprint7-v4.cjs
+test-sprint7-swipe.cjs
+test-sprint7-final.cjs
+
+# Log files
+*.log
