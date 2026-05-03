@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Plus } from 'lucide-react'
 import { subscribeActivePayments, subscribeCompletedPayments, createPayment, updatePayment, deletePayment } from '../lib/firestore'
 import type { Payment } from '../types'
 import { PaymentCard } from '../components/PaymentCard'
@@ -258,7 +259,7 @@ export function RoomPage({ roomId }: Props) {
         }`}
         aria-label="支払いを追加"
       >
-        ＋
+        <Plus size={28} />
       </button>
 
       <Toast toasts={toasts} onDismiss={dismissToast} />

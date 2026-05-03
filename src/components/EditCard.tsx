@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { ClipboardPaste } from 'lucide-react'
 
 type FormErrors = {
   title?: string
@@ -167,10 +168,10 @@ export function EditCard({ onSave, onCancel, initialData }: Props) {
           <button
             type="button"
             onClick={handlePaste}
-            className="px-3 py-2 text-base border-l border-gray-300 text-gray-500 hover:bg-gray-50 shrink-0"
+            className="px-3 py-2 border-l border-gray-300 text-gray-500 hover:bg-gray-50 shrink-0 flex items-center justify-center"
             title="クリップボードから貼り付け"
           >
-            📋
+            <ClipboardPaste size={20} />
           </button>
         </div>
         {errors.payPayUrl && (

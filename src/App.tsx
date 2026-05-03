@@ -1,23 +1,36 @@
 import { useEffect, useState } from 'react'
-import { resolveRoute, navigateToHash, getCurrentHash } from './lib/routing'
+import { resolveRoute, getCurrentHash } from './lib/routing'
 import { RoomPage } from './pages/RoomPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { WelcomePage } from './pages/WelcomePage'
+import { CreateRoomPage } from './pages/CreateRoomPage'
+import { ShareLinkPage } from './pages/ShareLinkPage'
 
 type AppState =
-  | { status: 'loading' }
+  | { status: 'welcome' }
+  | { status: 'create' }
+  | { status: 'share'; roomId: string }
+  | { status: 'settings'; roomId: string }
   | { status: 'room'; roomId: string }
   | { status: 'notFound' }
 
 function resolveState(hash: string): AppState {
   const result = resolveRoute(hash)
-  if (result.type === 'redirect') {
-    navigateToHash(result.roomId)
-    return { status: 'loading' }
+  switch (result.type) {
+    case 'welcome':
+      return { status: 'welcome' }
+    case 'create':
+      return { status: 'create' }
+    case 'share':
+      return { status: 'share', roomId: result.roomId }
+    case 'settings':
+      return { status: 'settings', roomId: result.roomId }
+    case 'room':
+      return { status: 'room', roomId: result.roomId }
+    case 'notFound':
+    default:
+      return { status: 'notFound' }
   }
-  if (result.type === 'room') {
-    return { status: 'room', roomId: result.roomId }
-  }
-  return { status: 'notFound' }
 }
 
 export function App() {
@@ -33,17 +46,19 @@ export function App() {
     return () => window.removeEventListener('hashchange', handler)
   }, [])
 
-  if (state.status === 'loading') {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-gray-400">リダイレクト中...</p>
-      </div>
-    )
+  switch (state.status) {
+    case 'welcome':
+      return <WelcomePage />
+    case 'create':
+      return <CreateRoomPage />
+    case 'share':
+      return <ShareLinkPage roomId={state.roomId} />
+    case 'settings':
+      return <NotFoundPage />
+    case 'room':
+      return <RoomPage roomId={state.roomId} />
+    case 'notFound':
+    default:
+      return <NotFoundPage />
   }
-
-  if (state.status === 'notFound') {
-    return <NotFoundPage />
-  }
-
-  return <RoomPage roomId={state.roomId} />
 }

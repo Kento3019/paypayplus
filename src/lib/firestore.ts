@@ -4,7 +4,9 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
+  setDoc,
   onSnapshot,
   query,
   orderBy,
@@ -12,7 +14,7 @@ import {
   Timestamp,
 } from 'firebase/firestore'
 import { db } from './firebase'
-import type { Payment } from '../types'
+import type { Payment, Room, Member } from '../types'
 
 const paymentsRef = (roomId: string) =>
   collection(db, 'rooms', roomId, 'payments')
@@ -121,4 +123,28 @@ export function subscribeCompletedPayments(
     })
     callback(payments)
   })
+}
+
+export async function createRoom(
+  roomId: string,
+  members: [Member, Member]
+): Promise<void> {
+  const ref = doc(db, 'rooms', roomId)
+  await setDoc(ref, {
+    createdAt: Timestamp.fromDate(new Date()),
+    members: members.map((m) => ({ id: m.id, name: m.name, color: m.color })),
+  })
+  console.log('[Firestore] created room', roomId)
+}
+
+export async function getRoom(roomId: string): Promise<Room | null> {
+  const ref = doc(db, 'rooms', roomId)
+  const snap = await getDoc(ref)
+  if (!snap.exists()) return null
+  const data = snap.data()
+  return {
+    id: snap.id,
+    createdAt: (data.createdAt as Timestamp).toDate(),
+    members: data.members as [Member, Member],
+  }
 }
