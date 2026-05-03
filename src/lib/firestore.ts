@@ -30,6 +30,7 @@ export async function createPayment(
     createdAt: Timestamp.fromDate(data.createdAt),
     completedAt: data.completedAt ? Timestamp.fromDate(data.completedAt) : null,
     isDone: data.isDone,
+    creatorId: data.creatorId ?? null,
   })
   console.log('[Firestore] created payment', ref.id, 'in room', roomId)
   return ref.id
@@ -71,6 +72,7 @@ export async function listPayments(roomId: string): Promise<Payment[]> {
         ? (data.completedAt as Timestamp).toDate()
         : null,
       isDone: data.isDone as boolean,
+      creatorId: (data.creatorId as string | null) ?? null,
     } satisfies Payment
   })
   console.log('[Firestore] listPayments for room', roomId, ':', payments.length, 'docs')
@@ -89,6 +91,7 @@ function docToPayment(d: { id: string; data: () => Record<string, unknown> }): P
       ? (data.completedAt as Timestamp).toDate()
       : null,
     isDone: data.isDone as boolean,
+    creatorId: (data.creatorId as string | null) ?? null,
   }
 }
 
@@ -135,6 +138,17 @@ export async function createRoom(
     members: members.map((m) => ({ id: m.id, name: m.name, color: m.color })),
   })
   console.log('[Firestore] created room', roomId)
+}
+
+export async function updateRoom(
+  roomId: string,
+  members: [Member, Member]
+): Promise<void> {
+  const ref = doc(db, 'rooms', roomId)
+  await updateDoc(ref, {
+    members: members.map((m) => ({ id: m.id, name: m.name, color: m.color })),
+  })
+  console.log('[Firestore] updated room', roomId)
 }
 
 export async function getRoom(roomId: string): Promise<Room | null> {

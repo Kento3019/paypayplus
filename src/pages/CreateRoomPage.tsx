@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { createRoom } from '../lib/firestore'
 import { generateRandomHash, navigateToHash } from '../lib/routing'
 import { Toast, createToast } from '../components/Toast'
@@ -102,13 +103,14 @@ export function CreateRoomPage() {
           )}
         </div>
 
-        <button
+        <motion.button
           onClick={handleCreate}
           disabled={creating}
+          whileTap={{ scale: 0.95 }}
           className="w-full py-4 rounded-xl bg-[#2196F3] text-white text-base font-bold shadow-md hover:bg-blue-600 active:bg-blue-700 transition-colors disabled:opacity-50"
         >
           {creating ? '作成中...' : 'ルームを作成する'}
-        </button>
+        </motion.button>
       </div>
     </div>
   )

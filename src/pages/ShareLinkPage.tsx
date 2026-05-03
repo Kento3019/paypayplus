@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { getRoom } from '../lib/firestore'
 import { navigateToHash } from '../lib/routing'
 import { NotFoundPage } from './NotFoundPage'
@@ -33,7 +34,6 @@ export function ShareLinkPage({ roomId }: Props) {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      // fallback
       const ta = document.createElement('textarea')
       ta.value = roomUrl
       document.body.appendChild(ta)
@@ -83,8 +83,9 @@ export function ShareLinkPage({ roomId }: Props) {
           <p className="text-sm text-gray-600 break-all">{roomUrl}</p>
         </div>
 
-        <button
+        <motion.button
           onClick={handleCopy}
+          whileTap={{ scale: 0.95 }}
           className={`w-full py-3 rounded-xl text-base font-bold shadow-sm transition-all mb-4 ${
             copied
               ? 'bg-green-500 text-white'
@@ -92,14 +93,15 @@ export function ShareLinkPage({ roomId }: Props) {
           }`}
         >
           {copied ? 'コピーした！ ✓' : 'コピー'}
-        </button>
+        </motion.button>
 
-        <button
+        <motion.button
           onClick={handleEnterRoom}
+          whileTap={{ scale: 0.95 }}
           className="w-full py-4 rounded-xl bg-[#2196F3] text-white text-base font-bold shadow-md hover:bg-blue-600 active:bg-blue-700 transition-colors"
         >
           ルームへ入る
-        </button>
+        </motion.button>
       </div>
     </div>
   )

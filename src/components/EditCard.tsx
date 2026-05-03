@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 import { ClipboardPaste } from 'lucide-react'
+import type { Member } from '../types'
 
 type FormErrors = {
   title?: string
@@ -11,12 +13,15 @@ type InitialData = {
   title: string
   amount: number
   payPayUrl: string | null
+  creatorId?: string | null
 }
 
 type Props = {
-  onSave: (data: { title: string; amount: number; payPayUrl: string | null }) => Promise<void>
+  onSave: (data: { title: string; amount: number; payPayUrl: string | null; creatorId: string | null }) => Promise<void>
   onCancel: () => void
   initialData?: InitialData
+  members?: [Member, Member] | null
+  isNew?: boolean
 }
 
 function validateTitle(value: string): string | undefined {
@@ -47,10 +52,11 @@ function validatePayPayUrl(value: string): string | undefined {
   return undefined
 }
 
-export function EditCard({ onSave, onCancel, initialData }: Props) {
+export function EditCard({ onSave, onCancel, initialData, members, isNew = false }: Props) {
   const [title, setTitle] = useState(initialData?.title ?? '')
   const [amount, setAmount] = useState(initialData?.amount != null ? String(initialData.amount) : '')
   const [payPayUrl, setPayPayUrl] = useState(initialData?.payPayUrl ?? '')
+  const [creatorId, setCreatorId] = useState<string | null>(initialData?.creatorId ?? null)
   const [errors, setErrors] = useState<FormErrors>({})
   const [saving, setSaving] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
@@ -75,6 +81,7 @@ export function EditCard({ onSave, onCancel, initialData }: Props) {
         title: title.trim(),
         amount: parseInt(amount, 10),
         payPayUrl: payPayUrl.trim() !== '' ? payPayUrl.trim() : null,
+        creatorId,
       })
     } finally {
       setSaving(false)
@@ -101,9 +108,16 @@ export function EditCard({ onSave, onCancel, initialData }: Props) {
     }
   }
 
+  function handleCreatorToggle(memberId: string) {
+    setCreatorId((prev) => (prev === memberId ? null : memberId))
+  }
+
   return (
-    <div
+    <motion.div
       ref={cardRef}
+      initial={isNew ? { opacity: 0, y: 24 } : false}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       className="bg-card rounded-lg p-4 shadow-sm"
       onClick={(e) => e.stopPropagation()}
     >
@@ -165,38 +179,68 @@ export function EditCard({ onSave, onCancel, initialData }: Props) {
             placeholder="https://paypay.ne.jp/..."
             className="flex-1 px-3 py-2 outline-none text-sm bg-transparent min-w-0"
           />
-          <button
+          <motion.button
             type="button"
             onClick={handlePaste}
+            whileTap={{ scale: 0.95 }}
             className="px-3 py-2 border-l border-gray-300 text-gray-500 hover:bg-gray-50 shrink-0 flex items-center justify-center"
             title="クリップボードから貼り付け"
           >
             <ClipboardPaste size={20} />
-          </button>
+          </motion.button>
         </div>
         {errors.payPayUrl && (
           <p className="text-red-500 text-xs mt-1">{errors.payPayUrl}</p>
         )}
       </div>
 
+      {members && (
+        <div className="mb-4">
+          <p className="text-sm text-gray-600 mb-2">誰が払う？</p>
+          <div className="flex gap-2">
+            {members.map((member) => {
+              const isSelected = creatorId === member.id
+              return (
+                <motion.button
+                  key={member.id}
+                  type="button"
+                  onClick={() => handleCreatorToggle(member.id)}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex-1 py-2 rounded-lg text-sm font-medium border transition-colors"
+                  style={
+                    isSelected
+                      ? { backgroundColor: member.color, borderColor: member.color, color: '#fff' }
+                      : { backgroundColor: '#fff', borderColor: '#d1d5db', color: '#374151' }
+                  }
+                >
+                  {member.name}
+                </motion.button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-2">
-        <button
+        <motion.button
           type="button"
           onClick={onCancel}
           disabled={saving}
+          whileTap={{ scale: 0.95 }}
           className="flex-1 py-2 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
         >
           キャンセル
-        </button>
-        <button
+        </motion.button>
+        <motion.button
           type="button"
           onClick={handleSave}
           disabled={saving}
+          whileTap={{ scale: 0.95 }}
           className="flex-1 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 disabled:opacity-50"
         >
           {saving ? '保存中...' : '保存'}
-        </button>
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   )
 }

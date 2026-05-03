@@ -1,33 +1,57 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Plus } from 'lucide-react'
-import { subscribeActivePayments, subscribeCompletedPayments, createPayment, updatePayment, deletePayment } from '../lib/firestore'
-import type { Payment } from '../types'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
+import { Plus, Settings } from 'lucide-react'
+import { subscribeActivePayments, subscribeCompletedPayments, createPayment, updatePayment, deletePayment, getRoom } from '../lib/firestore'
+import type { Payment, Member } from '../types'
 import { PaymentCard } from '../components/PaymentCard'
 import { EditCard } from '../components/EditCard'
 import { Toast, createToast } from '../components/Toast'
 import type { ToastMessage } from '../components/Toast'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { HistorySection } from '../components/HistorySection'
+import { navigateToHash } from '../lib/routing'
 
 type Props = {
   roomId: string
+  onNotFound?: () => void
 }
 
-export function RoomPage({ roomId }: Props) {
+export function RoomPage({ roomId, onNotFound }: Props) {
   const [payments, setPayments] = useState<Payment[]>([])
   const [completedPayments, setCompletedPayments] = useState<Payment[]>([])
   const [loading, setLoading] = useState(true)
+  const [members, setMembers] = useState<[Member, Member] | null>(null)
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [toasts, setToasts] = useState<ToastMessage[]>([])
   const [pendingCompletePayment, setPendingCompletePayment] = useState<Payment | null>(null)
   const [pendingDeletePayment, setPendingDeletePayment] = useState<Payment | null>(null)
   const [fadingOutIds, setFadingOutIds] = useState<Set<string>>(new Set())
+  const initialLoadDone = useRef(false)
+
+  useEffect(() => {
+    getRoom(roomId).then((room) => {
+      if (!room) {
+        onNotFound?.()
+        return
+      }
+      setMembers(room.members)
+    })
+  }, [roomId, onNotFound])
 
   useEffect(() => {
     const unsubscribeActive = subscribeActivePayments(roomId, (data) => {
       setPayments(data)
       setLoading(false)
+
+      if (!initialLoadDone.current) {
+        initialLoadDone.current = true
+        if (data.length === 0) {
+          setIsAdding(true)
+        }
+      } else if (data.length === 0) {
+        setIsAdding(true)
+      }
     })
     const unsubscribeCompleted = subscribeCompletedPayments(roomId, (data) => {
       setCompletedPayments(data)
@@ -42,7 +66,7 @@ export function RoomPage({ roomId }: Props) {
     setToasts((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
-  function showToast(message: string, type: 'success' | 'error' = 'success') {
+  function showToast(message: string, type: 'success' | 'error' | 'complete' | 'delete' = 'success') {
     setToasts((prev) => [...prev, createToast(message, type)])
   }
 
@@ -55,7 +79,7 @@ export function RoomPage({ roomId }: Props) {
     setIsAdding(false)
   }
 
-  async function handleSaveAdd(data: { title: string; amount: number; payPayUrl: string | null }) {
+  async function handleSaveAdd(data: { title: string; amount: number; payPayUrl: string | null; creatorId: string | null }) {
     if (!navigator.onLine) {
       showToast('通信エラーが発生しました', 'error')
       return
@@ -68,9 +92,10 @@ export function RoomPage({ roomId }: Props) {
         createdAt: new Date(),
         completedAt: null,
         isDone: false,
+        creatorId: data.creatorId,
       })
       setIsAdding(false)
-      showToast('保存しました')
+      showToast('保存しました', 'success')
     } catch {
       showToast('通信エラーが発生しました', 'error')
     }
@@ -106,7 +131,7 @@ export function RoomPage({ roomId }: Props) {
           isDone: true,
           completedAt: new Date(),
         })
-        showToast('完了しました')
+        showToast('完了しました 🎉', 'complete')
       } catch {
         setFadingOutIds((prev) => {
           const next = new Set(prev)
@@ -115,7 +140,7 @@ export function RoomPage({ roomId }: Props) {
         })
         showToast('通信エラーが発生しました', 'error')
       }
-    }, 400)
+    }, 350)
   }
 
   function handleCancelComplete() {
@@ -132,7 +157,7 @@ export function RoomPage({ roomId }: Props) {
 
   async function handleSaveEdit(
     paymentId: string,
-    data: { title: string; amount: number; payPayUrl: string | null }
+    data: { title: string; amount: number; payPayUrl: string | null; creatorId: string | null }
   ) {
     if (!navigator.onLine) {
       showToast('通信エラーが発生しました', 'error')
@@ -143,9 +168,10 @@ export function RoomPage({ roomId }: Props) {
         title: data.title,
         amount: data.amount,
         payPayUrl: data.payPayUrl,
+        creatorId: data.creatorId,
       })
       setEditingId(null)
-      showToast('保存しました')
+      showToast('保存しました', 'success')
     } catch {
       showToast('通信エラーが発生しました', 'error')
     }
@@ -169,7 +195,7 @@ export function RoomPage({ roomId }: Props) {
     setTimeout(async () => {
       try {
         await deletePayment(roomId, target.id)
-        showToast('削除しました')
+        showToast('削除しました', 'delete')
       } catch {
         setFadingOutIds((prev) => {
           const next = new Set(prev)
@@ -178,7 +204,7 @@ export function RoomPage({ roomId }: Props) {
         })
         showToast('通信エラーが発生しました', 'error')
       }
-    }, 400)
+    }, 350)
   }
 
   function handleCancelDelete() {
@@ -190,8 +216,21 @@ export function RoomPage({ roomId }: Props) {
   return (
     <div className="min-h-screen bg-background" onClick={handleOverlayClick}>
       <div className="max-w-md mx-auto px-4 py-6">
+        <div className="flex items-center justify-end mb-4">
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={(e) => {
+              e.stopPropagation()
+              navigateToHash(`settings/${roomId}`)
+            }}
+            className="text-gray-500 hover:text-gray-700 p-1"
+            aria-label="設定"
+          >
+            <Settings size={22} />
+          </motion.button>
+        </div>
         {loading ? (
-          <div className="flex items-center justify-center min-h-screen -mt-6">
+          <div className="flex items-center justify-center min-h-[60vh]">
             <p className="text-gray-400 text-sm">読み込み中...</p>
           </div>
         ) : (
@@ -200,10 +239,15 @@ export function RoomPage({ roomId }: Props) {
               <ul className="space-y-3">
                 {isAdding && (
                   <li>
-                    <EditCard onSave={handleSaveAdd} onCancel={handleCancelAdd} />
+                    <EditCard
+                      onSave={handleSaveAdd}
+                      onCancel={handleCancelAdd}
+                      members={members}
+                      isNew={true}
+                    />
                   </li>
                 )}
-                {payments.map((payment) => (
+                {payments.map((payment, index) => (
                   <li
                     key={payment.id}
                     className={
@@ -218,35 +262,37 @@ export function RoomPage({ roomId }: Props) {
                           title: payment.title,
                           amount: payment.amount,
                           payPayUrl: payment.payPayUrl,
+                          creatorId: payment.creatorId,
                         }}
                         onSave={(data) => handleSaveEdit(payment.id, data)}
                         onCancel={handleCancelEdit}
+                        members={members}
+                        isNew={false}
                       />
                     ) : (
                       <PaymentCard
                         payment={payment}
+                        members={members}
                         onCompleteRequest={handleCompleteRequest}
                         onEditRequest={handleEditRequest}
                         onDeleteRequest={handleDeleteRequest}
                         disabled={isLocked}
                         fadingOut={fadingOutIds.has(payment.id)}
+                        index={index}
                       />
                     )}
                   </li>
                 ))}
               </ul>
-            ) : (
-              <div className="flex items-center justify-center min-h-screen -mt-6">
-                <p className="text-gray-400 text-sm">URLを共有してね</p>
-              </div>
-            )}
+            ) : null}
 
             <HistorySection payments={completedPayments} />
           </>
         )}
       </div>
 
-      <button
+      <motion.button
+        whileTap={{ scale: 0.95 }}
         onClick={(e) => {
           e.stopPropagation()
           handleFabClick()
@@ -260,7 +306,7 @@ export function RoomPage({ roomId }: Props) {
         aria-label="支払いを追加"
       >
         <Plus size={28} />
-      </button>
+      </motion.button>
 
       <Toast toasts={toasts} onDismiss={dismissToast} />
 

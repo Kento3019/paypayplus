@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { resolveRoute, getCurrentHash } from './lib/routing'
 import { RoomPage } from './pages/RoomPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { WelcomePage } from './pages/WelcomePage'
 import { CreateRoomPage } from './pages/CreateRoomPage'
 import { ShareLinkPage } from './pages/ShareLinkPage'
+import { SettingsPage } from './pages/SettingsPage'
 
 type AppState =
   | { status: 'welcome' }
@@ -33,6 +35,19 @@ function resolveState(hash: string): AppState {
   }
 }
 
+function stateKey(state: AppState): string {
+  switch (state.status) {
+    case 'room':
+      return `room-${state.roomId}`
+    case 'share':
+      return `share-${state.roomId}`
+    case 'settings':
+      return `settings-${state.roomId}`
+    default:
+      return state.status
+  }
+}
+
 export function App() {
   const [state, setState] = useState<AppState>(() =>
     resolveState(getCurrentHash())
@@ -46,19 +61,40 @@ export function App() {
     return () => window.removeEventListener('hashchange', handler)
   }, [])
 
-  switch (state.status) {
-    case 'welcome':
-      return <WelcomePage />
-    case 'create':
-      return <CreateRoomPage />
-    case 'share':
-      return <ShareLinkPage roomId={state.roomId} />
-    case 'settings':
-      return <NotFoundPage />
-    case 'room':
-      return <RoomPage roomId={state.roomId} />
-    case 'notFound':
-    default:
-      return <NotFoundPage />
+  function renderPage(s: AppState) {
+    switch (s.status) {
+      case 'welcome':
+        return <WelcomePage />
+      case 'create':
+        return <CreateRoomPage />
+      case 'share':
+        return <ShareLinkPage roomId={s.roomId} />
+      case 'settings':
+        return (
+          <SettingsPage
+            roomId={s.roomId}
+            onNotFound={() => setState({ status: 'notFound' })}
+          />
+        )
+      case 'room':
+        return <RoomPage roomId={s.roomId} />
+      case 'notFound':
+      default:
+        return <NotFoundPage />
+    }
   }
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={stateKey(state)}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+      >
+        {renderPage(state)}
+      </motion.div>
+    </AnimatePresence>
+  )
 }

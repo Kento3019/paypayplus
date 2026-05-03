@@ -18,4 +18,5 @@ export type Payment = {
   createdAt: Date;
   completedAt: Date | null;
   isDone: boolean;
+  creatorId: string | null;
 };

@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import { navigateToHash } from '../lib/routing'
 
 export function WelcomePage() {
@@ -17,12 +18,13 @@ export function WelcomePage() {
           </p>
         </div>
 
-        <button
+        <motion.button
           onClick={handleCreateRoom}
+          whileTap={{ scale: 0.95 }}
           className="w-full py-4 rounded-xl bg-[#2196F3] text-white text-base font-bold shadow-md hover:bg-blue-600 active:bg-blue-700 transition-colors"
         >
           新しいルームを作る
-        </button>
+        </motion.button>
 
         <p className="mt-8 text-xs text-gray-400 leading-relaxed">
           ルームのURLを受け取ったら<br />
