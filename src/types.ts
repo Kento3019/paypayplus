@@ -16,6 +16,7 @@ export type Payment = {
   amount: number;
   payPayUrl: string | null;
   createdAt: Date;
+  updatedAt: Date | null;
   completedAt: Date | null;
   isDone: boolean;
   creatorId: string | null;

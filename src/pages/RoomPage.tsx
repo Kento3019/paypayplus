@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, Settings } from 'lucide-react'
+import { Plus, Settings, Wallet, ArrowDownRight } from 'lucide-react'
 import { subscribeActivePayments, subscribeCompletedPayments, createPayment, updatePayment, deletePayment, getRoom } from '../lib/firestore'
 import type { Payment, Member } from '../types'
 import { PaymentCard } from '../components/PaymentCard'
 import { EditCard } from '../components/EditCard'
-import { Toast, createToast } from '../components/Toast'
-import type { ToastMessage } from '../components/Toast'
+import { Banner, createBanner } from '../components/Banner'
+import type { BannerMessage } from '../components/Banner'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { HistorySection } from '../components/HistorySection'
 import { navigateToHash } from '../lib/routing'
@@ -23,7 +23,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
   const [members, setMembers] = useState<[Member, Member] | null>(null)
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [toasts, setToasts] = useState<ToastMessage[]>([])
+  const [banners, setBanners] = useState<BannerMessage[]>([])
   const [pendingCompletePayment, setPendingCompletePayment] = useState<Payment | null>(null)
   const [pendingDeletePayment, setPendingDeletePayment] = useState<Payment | null>(null)
   const [fadingOutIds, setFadingOutIds] = useState<Set<string>>(new Set())
@@ -43,15 +43,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
     const unsubscribeActive = subscribeActivePayments(roomId, (data) => {
       setPayments(data)
       setLoading(false)
-
-      if (!initialLoadDone.current) {
-        initialLoadDone.current = true
-        if (data.length === 0) {
-          setIsAdding(true)
-        }
-      } else if (data.length === 0) {
-        setIsAdding(true)
-      }
+      initialLoadDone.current = true
     })
     const unsubscribeCompleted = subscribeCompletedPayments(roomId, (data) => {
       setCompletedPayments(data)
@@ -62,12 +54,12 @@ export function RoomPage({ roomId, onNotFound }: Props) {
     }
   }, [roomId])
 
-  const dismissToast = useCallback((id: number) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id))
+  const dismissBanner = useCallback((id: number) => {
+    setBanners((prev) => prev.filter((b) => b.id !== id))
   }, [])
 
-  function showToast(message: string, type: 'success' | 'error' | 'complete' | 'delete' = 'success') {
-    setToasts((prev) => [...prev, createToast(message, type)])
+  function showBanner(message: string, type: 'save' | 'complete' | 'delete' | 'error' = 'save') {
+    setBanners((prev) => [...prev, createBanner(message, type)])
   }
 
   function handleFabClick() {
@@ -81,7 +73,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
 
   async function handleSaveAdd(data: { title: string; amount: number; payPayUrl: string | null; creatorId: string | null }) {
     if (!navigator.onLine) {
-      showToast('通信エラーが発生しました', 'error')
+      showBanner('通信エラーが発生しました', 'error')
       return
     }
     try {
@@ -90,14 +82,15 @@ export function RoomPage({ roomId, onNotFound }: Props) {
         amount: data.amount,
         payPayUrl: data.payPayUrl,
         createdAt: new Date(),
+        updatedAt: null,
         completedAt: null,
         isDone: false,
         creatorId: data.creatorId,
       })
       setIsAdding(false)
-      showToast('保存しました', 'success')
+      showBanner('保存しました', 'save')
     } catch {
-      showToast('通信エラーが発生しました', 'error')
+      showBanner('通信エラーが発生しました', 'error')
     }
   }
 
@@ -116,7 +109,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
 
   async function handleConfirmComplete() {
     if (!navigator.onLine) {
-      showToast('通信エラーが発生しました', 'error')
+      showBanner('通信エラーが発生しました', 'error')
       return
     }
     if (!pendingCompletePayment) return
@@ -131,14 +124,14 @@ export function RoomPage({ roomId, onNotFound }: Props) {
           isDone: true,
           completedAt: new Date(),
         })
-        showToast('完了しました 🎉', 'complete')
+        showBanner('完了しました', 'complete')
       } catch {
         setFadingOutIds((prev) => {
           const next = new Set(prev)
           next.delete(target.id)
           return next
         })
-        showToast('通信エラーが発生しました', 'error')
+        showBanner('通信エラーが発生しました', 'error')
       }
     }, 350)
   }
@@ -160,7 +153,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
     data: { title: string; amount: number; payPayUrl: string | null; creatorId: string | null }
   ) {
     if (!navigator.onLine) {
-      showToast('通信エラーが発生しました', 'error')
+      showBanner('通信エラーが発生しました', 'error')
       return
     }
     try {
@@ -171,9 +164,9 @@ export function RoomPage({ roomId, onNotFound }: Props) {
         creatorId: data.creatorId,
       })
       setEditingId(null)
-      showToast('保存しました', 'success')
+      showBanner('保存しました', 'save')
     } catch {
-      showToast('通信エラーが発生しました', 'error')
+      showBanner('通信エラーが発生しました', 'error')
     }
   }
 
@@ -183,7 +176,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
 
   async function handleConfirmDelete() {
     if (!navigator.onLine) {
-      showToast('通信エラーが発生しました', 'error')
+      showBanner('通信エラーが発生しました', 'error')
       return
     }
     if (!pendingDeletePayment) return
@@ -195,14 +188,14 @@ export function RoomPage({ roomId, onNotFound }: Props) {
     setTimeout(async () => {
       try {
         await deletePayment(roomId, target.id)
-        showToast('削除しました', 'delete')
+        showBanner('削除しました', 'delete')
       } catch {
         setFadingOutIds((prev) => {
           const next = new Set(prev)
           next.delete(target.id)
           return next
         })
-        showToast('通信エラーが発生しました', 'error')
+        showBanner('通信エラーが発生しました', 'error')
       }
     }, 350)
   }
@@ -284,9 +277,29 @@ export function RoomPage({ roomId, onNotFound }: Props) {
                   </li>
                 ))}
               </ul>
-            ) : null}
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="flex flex-col items-center text-center py-12 px-6"
+              >
+                <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-5">
+                  <Wallet size={40} className="text-blue-500" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-700 mb-2">立替を記録しよう</h3>
+                <p className="text-sm text-gray-500 leading-relaxed mb-6">
+                  右下の<span className="font-bold text-blue-500">＋ボタン</span>をタップして、
+                  <br />最初の立替を追加しましょう
+                </p>
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <ArrowDownRight size={14} />
+                  <span>下の＋ボタンから追加</span>
+                </div>
+              </motion.div>
+            )}
 
-            <HistorySection payments={completedPayments} />
+            <HistorySection payments={completedPayments} members={members} />
           </>
         )}
       </div>
@@ -308,7 +321,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
         <Plus size={28} />
       </motion.button>
 
-      <Toast toasts={toasts} onDismiss={dismissToast} />
+      <Banner banners={banners} onDismiss={dismissBanner} />
 
       {pendingCompletePayment && (
         <ConfirmDialog

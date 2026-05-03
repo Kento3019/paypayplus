@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useSwipeable } from 'react-swipeable'
+import { CircleCheckBig, SquarePen, Trash2, AlertCircle } from 'lucide-react'
 import type { Payment, Member } from '../types'
 
 type Props = {
@@ -18,10 +19,22 @@ function formatAmount(amount: number): string {
   return `¥${amount.toLocaleString('ja-JP')}`
 }
 
-function formatCreatedAt(date: Date): string {
+function formatDateTime(date: Date): string {
   const m = date.getMonth() + 1
   const d = date.getDate()
-  return `${m}/${d}に作成`
+  const hh = String(date.getHours()).padStart(2, '0')
+  const mm = String(date.getMinutes()).padStart(2, '0')
+  return `${m}/${d} ${hh}:${mm}`
+}
+
+function isSameMinute(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate() &&
+    a.getHours() === b.getHours() &&
+    a.getMinutes() === b.getMinutes()
+  )
 }
 
 const SWIPE_THRESHOLD = 80
@@ -41,7 +54,16 @@ export function PaymentCard({
   const creatorMember = payment.creatorId
     ? members?.find((m) => m.id === payment.creatorId) ?? null
     : null
+  const otherMember = payment.creatorId && members
+    ? members.find((m) => m.id !== payment.creatorId) ?? null
+    : null
   const borderColor = creatorMember ? creatorMember.color : '#E0E0E0'
+
+  const showUpdatedAt =
+    payment.updatedAt !== null &&
+    payment.updatedAt !== undefined &&
+    !isSameMinute(payment.createdAt, payment.updatedAt)
+
   const [deltaX, setDeltaX] = useState(0)
   const [isSwiping, setIsSwiping] = useState(false)
   const [rightSwipeOpen, setRightSwipeOpen] = useState(false)
@@ -140,7 +162,7 @@ export function PaymentCard({
       className="relative overflow-hidden rounded-lg"
       onClick={handleOverlayClick}
     >
-      {/* 左スワイプ（完了）ヒント: 緑 + ✓ */}
+      {/* 左スワイプ（完了）ヒント */}
       <div
         className="absolute inset-0 rounded-lg flex items-center justify-end pr-6"
         style={{
@@ -149,10 +171,10 @@ export function PaymentCard({
           transition: isSwiping ? 'none' : 'opacity 0.2s ease',
         }}
       >
-        <span className="text-white text-3xl font-bold select-none">✓</span>
+        <CircleCheckBig size={32} className="text-white" />
       </div>
 
-      {/* 右スワイプ（編集・削除）ヒント: 左端から[赤🗑️80px][青✏️80px]で左詰め配置 */}
+      {/* 右スワイプ（編集・削除）ヒント */}
       <div
         className="absolute inset-y-0 left-0 flex items-center"
         style={{
@@ -163,18 +185,20 @@ export function PaymentCard({
         }}
       >
         <div
-          className="flex items-center justify-center select-none"
+          className="flex items-center justify-center select-none gap-1 flex-col"
           style={{ width: '80px', height: '100%', backgroundColor: '#EF4444' }}
           onClick={rightSwipeOpen ? handleDeleteClick : undefined}
         >
-          <span className="text-white text-2xl">🗑️</span>
+          <Trash2 size={20} className="text-white" />
+          <span className="text-white text-xs">削除</span>
         </div>
         <div
-          className="flex items-center justify-center select-none"
+          className="flex items-center justify-center select-none gap-1 flex-col"
           style={{ width: '80px', height: '100%', backgroundColor: '#3B82F6' }}
           onClick={rightSwipeOpen ? handleEditClick : undefined}
         >
-          <span className="text-white text-2xl">✏️</span>
+          <SquarePen size={20} className="text-white" />
+          <span className="text-white text-xs">編集</span>
         </div>
       </div>
 
@@ -193,14 +217,36 @@ export function PaymentCard({
             className="shrink-0 rounded-l-lg"
             style={{ width: '4px', backgroundColor: borderColor }}
           />
-          <div className="flex-1 p-4">
-            <p className="font-medium text-amount text-base leading-tight">{payment.title}</p>
-            <div className="flex items-center justify-between mt-0.5">
-              <p className="text-xs text-gray-400">{formatCreatedAt(payment.createdAt)}</p>
-              {creatorMember && (
-                <p className="text-xs text-gray-400">{creatorMember.name}</p>
+          <div className="flex-1 p-4 relative">
+            {/* 未完了バッジ */}
+            <div className="absolute top-2 right-2">
+              <AlertCircle size={18} className="text-red-500" />
+            </div>
+
+            <p className="font-medium text-amount text-base leading-tight pr-6">{payment.title}</p>
+
+            {/* 日時表示 */}
+            <div className="mt-0.5 space-y-0.5">
+              <p className="text-xs text-gray-400">作成: {formatDateTime(payment.createdAt)}</p>
+              {showUpdatedAt && (
+                <p className="text-xs text-gray-400">更新: {formatDateTime(payment.updatedAt!)}</p>
               )}
             </div>
+
+            {/* 支払い方向セパレーター */}
+            {creatorMember && otherMember && (
+              <div className="flex items-center gap-2 my-3">
+                <div className="flex-1 h-px bg-gray-200" />
+                <p className="text-xs text-gray-500 whitespace-nowrap">
+                  <span style={{ color: creatorMember.color }}>{creatorMember.name}</span>
+                  <span className="text-gray-400 mx-1">→</span>
+                  <span style={{ color: otherMember.color }}>{otherMember.name}</span>
+                  <span className="text-gray-400"> に支払い</span>
+                </p>
+                <div className="flex-1 h-px bg-gray-200" />
+              </div>
+            )}
+
             <p className="text-3xl font-bold text-amount text-center my-4">
               {formatAmount(payment.amount)}
             </p>

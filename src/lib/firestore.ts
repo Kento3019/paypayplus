@@ -23,11 +23,13 @@ export async function createPayment(
   roomId: string,
   data: Omit<Payment, 'id'>
 ): Promise<string> {
+  const now = new Date()
   const ref = await addDoc(paymentsRef(roomId), {
     title: data.title,
     amount: data.amount,
     payPayUrl: data.payPayUrl,
     createdAt: Timestamp.fromDate(data.createdAt),
+    updatedAt: Timestamp.fromDate(now),
     completedAt: data.completedAt ? Timestamp.fromDate(data.completedAt) : null,
     isDone: data.isDone,
     creatorId: data.creatorId ?? null,
@@ -45,6 +47,7 @@ export async function updatePayment(
   const update: Record<string, unknown> = { ...data }
   if (data.createdAt) update.createdAt = Timestamp.fromDate(data.createdAt)
   if (data.completedAt) update.completedAt = Timestamp.fromDate(data.completedAt)
+  update.updatedAt = Timestamp.fromDate(new Date())
   await updateDoc(ref, update)
   console.log('[Firestore] updated payment', paymentId)
 }
@@ -60,21 +63,7 @@ export async function deletePayment(
 
 export async function listPayments(roomId: string): Promise<Payment[]> {
   const snap = await getDocs(paymentsRef(roomId))
-  const payments = snap.docs.map((d) => {
-    const data = d.data()
-    return {
-      id: d.id,
-      title: data.title as string,
-      amount: data.amount as number,
-      payPayUrl: data.payPayUrl as string | null,
-      createdAt: (data.createdAt as Timestamp).toDate(),
-      completedAt: data.completedAt
-        ? (data.completedAt as Timestamp).toDate()
-        : null,
-      isDone: data.isDone as boolean,
-      creatorId: (data.creatorId as string | null) ?? null,
-    } satisfies Payment
-  })
+  const payments = snap.docs.map((d) => docToPayment(d))
   console.log('[Firestore] listPayments for room', roomId, ':', payments.length, 'docs')
   return payments
 }
@@ -87,6 +76,7 @@ function docToPayment(d: { id: string; data: () => Record<string, unknown> }): P
     amount: data.amount as number,
     payPayUrl: data.payPayUrl as string | null,
     createdAt: (data.createdAt as Timestamp).toDate(),
+    updatedAt: data.updatedAt ? (data.updatedAt as Timestamp).toDate() : null,
     completedAt: data.completedAt
       ? (data.completedAt as Timestamp).toDate()
       : null,
