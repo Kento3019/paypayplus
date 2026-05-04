@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Wallet, Check } from 'lucide-react'
+import { Wallet, Check, PlusCircle, Share2, ListPlus, ChevronRight } from 'lucide-react'
 import { navigateToHash } from '../lib/routing'
 import { AppLogo } from '../components/AppLogo'
 
@@ -60,6 +60,40 @@ export function WelcomePage() {
           <div className="flex items-center gap-3">
             <Check size={16} className="text-primary flex-shrink-0" />
             <span className="text-sm text-gray-700">PayPayリンクを記録できる</span>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.35 }}
+          className="w-full mb-8"
+        >
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-4">
+            使い方
+          </p>
+          <div className="flex items-start justify-between gap-1">
+            {[
+              { icon: PlusCircle, title: 'ルーム作成', desc: '「作る」ボタンをタップ' },
+              { icon: Share2, title: 'URLを共有', desc: 'メンバーにURLを送る' },
+              { icon: ListPlus, title: '立替を記録', desc: '＋ボタンで追加する' },
+            ].map(({ icon: Icon, title, desc }, i) => (
+              <div key={i} className="flex items-start gap-1 flex-1">
+                <div className="flex flex-col items-center flex-1">
+                  <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center mb-2 relative">
+                    <Icon size={20} className="text-primary" />
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                      {i + 1}
+                    </span>
+                  </div>
+                  <p className="text-xs font-semibold text-gray-700 text-center leading-tight">{title}</p>
+                  <p className="text-[10px] text-gray-400 text-center leading-tight mt-0.5">{desc}</p>
+                </div>
+                {i < 2 && (
+                  <ChevronRight size={14} className="text-gray-300 mt-3 flex-shrink-0" />
+                )}
+              </div>
+            ))}
           </div>
         </motion.div>
 
