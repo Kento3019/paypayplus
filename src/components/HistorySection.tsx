@@ -54,7 +54,7 @@ function CompletedCard({ payment, members }: { payment: Payment; members?: [Memb
     !isSameMinute(payment.createdAt, payment.updatedAt)
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-green-400">
+    <div className="bg-card rounded-lg shadow-sm overflow-hidden border-l-4 border-green-400">
       <div className="p-4 relative">
         {/* 右上: 完了バッジ */}
         <div className="absolute top-3 right-3 flex items-center gap-1">
@@ -119,16 +119,16 @@ function AccordionSection({
   if (items.length === 0) return null
 
   return (
-    <div className="border border-green-200 rounded-lg overflow-hidden">
+    <div className="border border-gray-200 rounded-lg overflow-hidden">
       <button
         type="button"
-        className="w-full flex items-center justify-between px-4 py-3 bg-green-50 text-left"
+        className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 text-left"
         onClick={onToggle}
       >
         <div className="flex items-center gap-2">
           <CircleCheckBig size={14} className="text-green-500" />
-          <span className="text-sm font-medium text-gray-700">{label}</span>
-          <span className="text-xs text-green-600 bg-green-100 px-1.5 py-0.5 rounded-full">
+          <span className="text-sm font-medium text-gray-600">{label}</span>
+          <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
             {items.length}
           </span>
         </div>
@@ -138,7 +138,7 @@ function AccordionSection({
         />
       </button>
       {isOpen && (
-        <div className="divide-y divide-green-50">
+        <div className="divide-y divide-gray-100">
           {items.map((payment) => (
             <div key={payment.id} className="p-2">
               <CompletedCard payment={payment} members={members} />
