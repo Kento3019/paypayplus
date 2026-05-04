@@ -1,4 +1,4 @@
-# PayPay支払い管理アプリ 仕様書
+# OKULINK 仕様書
 
 > スプリント計画（Sprint 1〜11）は [sprints.md](sprints.md) を参照。
 
