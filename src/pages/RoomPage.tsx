@@ -208,7 +208,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
   const isLocked = isAdding || editingId !== null
 
   return (
-    <div className="min-h-screen bg-background" onClick={handleOverlayClick}>
+    <div className="min-h-[100dvh] bg-background" onClick={handleOverlayClick}>
       <div className="max-w-md mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-4">
           <AppLogo size="sm" />

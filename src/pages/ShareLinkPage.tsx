@@ -52,7 +52,7 @@ export function ShareLinkPage({ roomId }: Props) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
         <p className="text-gray-400 text-sm">読み込み中...</p>
       </div>
     )
@@ -60,7 +60,7 @@ export function ShareLinkPage({ roomId }: Props) {
 
   if (loadError) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
+      <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-sm text-center">
           <p className="text-4xl mb-4">⚠️</p>
           <h1 className="text-xl font-bold text-gray-800 mb-2">このルームにアクセスできません</h1>
@@ -75,7 +75,7 @@ export function ShareLinkPage({ roomId }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
+    <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm text-center">
         <AppLogo size="sm" className="mb-4" />
         <h1 className="text-2xl font-bold text-gray-800 mb-2">URLを共有してね</h1>

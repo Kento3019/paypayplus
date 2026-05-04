@@ -61,14 +61,14 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
         <p className="text-gray-400 text-sm">読み込み中...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[100dvh] bg-background">
       <div className="max-w-md mx-auto px-4 py-6">
         <AppLogo size="sm" className="mb-4" />
         <div className="flex items-center gap-3 mb-6">

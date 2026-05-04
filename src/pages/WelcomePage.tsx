@@ -9,14 +9,14 @@ export function WelcomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
+    <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm flex flex-col items-center">
 
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0 }}
-          className="mb-8"
+          className="mb-6"
         >
           <AppLogo size="lg" />
         </motion.div>
@@ -25,10 +25,10 @@ export function WelcomePage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="mb-6"
+          className="mb-4"
         >
-          <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-            <Wallet size={48} className="text-primary" />
+          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+            <Wallet size={36} className="text-primary" />
           </div>
         </motion.div>
 
@@ -36,7 +36,7 @@ export function WelcomePage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className="mb-6 text-center"
+          className="mb-4 text-center"
         >
           <h1 className="text-2xl font-bold text-gray-800 whitespace-pre-line">
             {'2人の支払いを\nかんたん管理'}
@@ -47,7 +47,7 @@ export function WelcomePage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
-          className="w-full bg-white rounded-xl p-4 space-y-3 mb-8"
+          className="w-full bg-white rounded-xl p-4 space-y-3 mb-4"
         >
           <div className="flex items-center gap-3">
             <Check size={16} className="text-primary flex-shrink-0" />
@@ -67,9 +67,9 @@ export function WelcomePage() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.35 }}
-          className="w-full mb-8"
+          className="w-full mb-4"
         >
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-4">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-3">
             使い方
           </p>
           <div className="flex items-start justify-between gap-1">
@@ -111,7 +111,7 @@ export function WelcomePage() {
             新しいルームを作る
           </motion.button>
 
-          <p className="mt-6 text-sm text-gray-400 leading-relaxed text-center">
+          <p className="mt-4 text-sm text-gray-400 leading-relaxed text-center">
             ルームのURLを受け取ったらそのままアクセスしてね
           </p>
         </motion.div>

@@ -55,7 +55,7 @@ export function CreateRoomPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
+    <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center px-6">
       <Toast toasts={toasts} onDismiss={dismissToast} />
       <div className="w-full max-w-sm">
         <AppLogo size="sm" className="mb-4" />
