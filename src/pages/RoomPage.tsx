@@ -10,6 +10,7 @@ import type { BannerMessage } from '../components/Banner'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { HistorySection } from '../components/HistorySection'
 import { navigateToHash } from '../lib/routing'
+import { AppLogo } from '../components/AppLogo'
 
 type Props = {
   roomId: string
@@ -209,7 +210,8 @@ export function RoomPage({ roomId, onNotFound }: Props) {
   return (
     <div className="min-h-screen bg-background" onClick={handleOverlayClick}>
       <div className="max-w-md mx-auto px-4 py-6">
-        <div className="flex items-center justify-end mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <AppLogo size="sm" />
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={(e) => {
@@ -284,12 +286,12 @@ export function RoomPage({ roomId, onNotFound }: Props) {
                 transition={{ duration: 0.4, ease: 'easeOut' }}
                 className="flex flex-col items-center text-center py-12 px-6"
               >
-                <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-5">
-                  <Wallet size={40} className="text-blue-500" />
+                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-5">
+                  <Wallet size={40} className="text-primary" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-700 mb-2">立替を記録しよう</h3>
                 <p className="text-sm text-gray-500 leading-relaxed mb-6">
-                  右下の<span className="font-bold text-blue-500">＋ボタン</span>をタップして、
+                  右下の<span className="font-bold text-primary">＋ボタン</span>をタップして、
                   <br />最初の立替を追加しましょう
                 </p>
                 <div className="flex items-center gap-2 text-xs text-gray-400">
@@ -311,10 +313,10 @@ export function RoomPage({ roomId, onNotFound }: Props) {
           handleFabClick()
         }}
         disabled={isAdding || editingId !== null || loading}
-        className={`fixed bottom-6 right-6 w-14 h-14 rounded-full bg-blue-500 text-white text-3xl shadow-lg flex items-center justify-center transition-opacity ${
+        className={`fixed bottom-6 right-6 w-14 h-14 rounded-full bg-primary text-white text-3xl shadow-lg flex items-center justify-center transition-opacity ${
           isAdding || editingId !== null || loading
             ? 'opacity-40 cursor-not-allowed'
-            : 'hover:bg-blue-600 active:bg-blue-700'
+            : 'hover:bg-primary-dark active:bg-primary-darker'
         }`}
         aria-label="支払いを追加"
       >

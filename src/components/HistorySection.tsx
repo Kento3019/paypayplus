@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { CircleCheckBig, ChevronDown } from 'lucide-react'
-import { motion } from 'framer-motion'
 import type { Payment, Member } from '../types'
 import { classifyPayment, formatAmount, formatCompletedDate } from '../lib/dateUtils'
 
@@ -42,8 +41,6 @@ function isSameMinute(a: Date, b: Date): boolean {
 }
 
 function CompletedCard({ payment, members }: { payment: Payment; members?: [Member, Member] | null }) {
-  const hasPayPayUrl = payment.payPayUrl !== null && payment.payPayUrl !== ''
-
   const creatorMember = payment.creatorId
     ? members?.find((m) => m.id === payment.creatorId) ?? null
     : null
@@ -94,27 +91,6 @@ function CompletedCard({ payment, members }: { payment: Payment; members?: [Memb
         <p className="text-3xl font-bold text-gray-700 text-center my-4">
           {formatAmount(payment.amount)}
         </p>
-
-        {/* PayPayボタン */}
-        {hasPayPayUrl ? (
-          <motion.a
-            href={payment.payPayUrl!}
-            target="_blank"
-            rel="noopener noreferrer"
-            whileTap={{ scale: 0.95 }}
-            className="block w-full py-3 rounded-lg bg-red-50 text-red-400 border border-red-200 text-center font-bold text-sm"
-            onClick={(e) => e.stopPropagation()}
-          >
-            PayPayで払う
-          </motion.a>
-        ) : (
-          <button
-            disabled
-            className="block w-full py-3 rounded-lg bg-gray-100 text-gray-300 border border-gray-200 text-center font-bold text-sm cursor-not-allowed"
-          >
-            PayPayで払う
-          </button>
-        )}
 
         {/* 完了日時 */}
         {payment.completedAt && (

@@ -5,6 +5,7 @@ import { generateRandomHash, navigateToHash } from '../lib/routing'
 import { Toast, createToast } from '../components/Toast'
 import type { ToastMessage } from '../components/Toast'
 import type { Member } from '../types'
+import { AppLogo } from '../components/AppLogo'
 
 type FormErrors = {
   member1?: string
@@ -54,9 +55,10 @@ export function CreateRoomPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] flex flex-col items-center justify-center px-6">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
       <Toast toasts={toasts} onDismiss={dismissToast} />
       <div className="w-full max-w-sm">
+        <AppLogo size="sm" className="mb-4" />
         <h1 className="text-2xl font-bold text-gray-800 mb-8 text-center">ルームを作成</h1>
 
         <div className="mb-5">
@@ -72,7 +74,7 @@ export function CreateRoomPage() {
             }}
             maxLength={10}
             placeholder="太郎"
-            className={`w-full border rounded-lg px-4 py-3 text-base outline-none focus:ring-2 focus:ring-blue-400 bg-white ${
+            className={`w-full border rounded-lg px-4 py-3 text-base outline-none focus:ring-2 focus:ring-primary/50 bg-white ${
               errors.member1 ? 'border-red-500' : 'border-gray-300'
             }`}
           />
@@ -94,7 +96,7 @@ export function CreateRoomPage() {
             }}
             maxLength={10}
             placeholder="花子"
-            className={`w-full border rounded-lg px-4 py-3 text-base outline-none focus:ring-2 focus:ring-blue-400 bg-white ${
+            className={`w-full border rounded-lg px-4 py-3 text-base outline-none focus:ring-2 focus:ring-primary/50 bg-white ${
               errors.member2 ? 'border-red-500' : 'border-gray-300'
             }`}
           />
@@ -107,7 +109,7 @@ export function CreateRoomPage() {
           onClick={handleCreate}
           disabled={creating}
           whileTap={{ scale: 0.95 }}
-          className="w-full py-4 rounded-xl bg-[#2196F3] text-white text-base font-bold shadow-md hover:bg-blue-600 active:bg-blue-700 transition-colors disabled:opacity-50"
+          className="w-full py-4 rounded-xl bg-primary text-white text-base font-bold shadow-md hover:bg-primary-dark active:bg-primary-darker transition-colors disabled:opacity-50"
         >
           {creating ? '作成中...' : 'ルームを作成する'}
         </motion.button>

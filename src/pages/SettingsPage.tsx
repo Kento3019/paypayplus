@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 import { getRoom, updateRoom } from '../lib/firestore'
 import type { Member } from '../types'
 import { navigateToHash } from '../lib/routing'
+import { AppLogo } from '../components/AppLogo'
 
 type Props = {
   roomId: string
@@ -69,6 +70,7 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-md mx-auto px-4 py-6">
+        <AppLogo size="sm" className="mb-4" />
         <div className="flex items-center gap-3 mb-6">
           <motion.button
             onClick={() => navigateToHash(roomId)}
@@ -92,7 +94,7 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
                 if (error1) setError1(validateName(e.target.value))
               }}
               maxLength={10}
-              className={`w-full border rounded px-3 py-2 text-base outline-none focus:ring-2 focus:ring-blue-400 ${
+              className={`w-full border rounded px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary/50 ${
                 error1 ? 'border-red-500' : 'border-gray-300'
               }`}
             />
@@ -109,7 +111,7 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
                 if (error2) setError2(validateName(e.target.value))
               }}
               maxLength={10}
-              className={`w-full border rounded px-3 py-2 text-base outline-none focus:ring-2 focus:ring-blue-400 ${
+              className={`w-full border rounded px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary/50 ${
                 error2 ? 'border-red-500' : 'border-gray-300'
               }`}
             />
@@ -121,7 +123,7 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
             onClick={handleSave}
             disabled={saving}
             whileTap={{ scale: 0.95 }}
-            className="w-full py-3 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 disabled:opacity-50"
+            className="w-full py-3 rounded-lg bg-primary text-white font-medium hover:bg-primary-dark active:bg-primary-darker disabled:opacity-50"
           >
             {saving ? '保存中...' : '保存する'}
           </motion.button>
