@@ -38,7 +38,7 @@ export const MSG = {
   editCard: {
     titlePlaceholder: 'タイトル',
     pasteTip: 'クリップボードから貼り付け',
-    payDirectionFn: (from: string, to: string) => `${from}から${to}に支払う`,
+    payDirectionFn: (from: string, to: string) => `${from}が${to}に支払う`,
   },
 
   paymentCard: {
