@@ -303,3 +303,32 @@
 - ビルドが通る（`npm run build` エラーなし）
 
 **想定工数**: L
+
+---
+
+### Sprint 14: 関心事分離 + 共通UIコンポーネント整備
+
+**実装する機能**
+
+**14A: 共通UIコンポーネント整備**（`src/components/ui/` 新設）
+- `MotionButton.tsx` — `motion.button` ラッパー。`variant: 'primary' | 'secondary' | 'ghost'`・`loading`・`disabled` props
+- `LoadingScreen.tsx` — フルページローディング表示。`message?` props
+- `FormField.tsx` — ラベル付き入力 + エラー表示のセット。`label`, `value`, `onChange`, `error?`, `maxLength?`, `placeholder?` props
+
+**14B: バリデーション一元化**（`src/lib/validators.ts` 新設）
+- `validateTitle`, `validateAmount`, `validatePayPayUrl`, `validateName` を一箇所に集約
+- `EditCard`, `CreateRoomPage`, `SettingsPage` からimportするだけにする
+
+**14C: ページロジックをカスタムフックへ抽出**
+- `useCreateRoom()` — `CreateRoomPage` のフォーム state・バリデーション・Firestore書き込み・navigate を抽出
+- `useSettingsForm(roomId)` — `SettingsPage` のデータ取得・フォーム state・バリデーション・保存ロジックを抽出
+
+**完了条件**
+
+- `src/components/ui/` に `MotionButton`, `LoadingScreen`, `FormField` が存在する
+- `src/lib/validators.ts` が存在し、`EditCard`/`CreateRoomPage`/`SettingsPage` から独自バリデーション関数が消えている
+- `CreateRoomPage.tsx` と `SettingsPage.tsx` がロジックを持たず JSX + フック呼び出しのみになっている
+- `src/hooks/` に `useCreateRoom`, `useSettingsForm` が存在する
+- ビルドが通る（`npm run build` エラーなし）
+
+**想定工数**: M

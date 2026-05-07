@@ -1,7 +1,8 @@
-import { motion } from 'framer-motion'
 import { Wallet, Check, PlusCircle, Share2, ListPlus, ChevronRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { AppLogo } from '../components/AppLogo'
+import { MotionButton } from '../components/ui/MotionButton'
 import { MSG } from '../lib/messages'
 
 export function WelcomePage() {
@@ -106,13 +107,12 @@ export function WelcomePage() {
           transition={{ duration: 0.4, delay: 0.4 }}
           className="w-full"
         >
-          <motion.button
+          <MotionButton
             onClick={handleCreateRoom}
-            whileTap={{ scale: 0.95 }}
-            className="w-full py-4 rounded-xl bg-primary text-white text-base font-bold shadow-md hover:bg-primary-dark active:bg-primary-darker transition-colors"
+            className="w-full py-4 rounded-xl text-base font-bold shadow-md transition-colors"
           >
             {MSG.welcome.createButton}
-          </motion.button>
+          </MotionButton>
 
           <p className="mt-4 text-sm text-gray-400 leading-relaxed text-center">
             {MSG.welcome.shareHint}

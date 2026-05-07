@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getRoom } from '../lib/firestore'
 import { NotFoundPage } from './NotFoundPage'
 import { AppLogo } from '../components/AppLogo'
+import { MotionButton } from '../components/ui/MotionButton'
+import { LoadingScreen } from '../components/ui/LoadingScreen'
 import { MSG } from '../lib/messages'
 
 type PageState = 'loading' | 'ready' | 'not_found' | 'error'
@@ -37,13 +38,7 @@ export function ShareLinkPage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  if (pageState === 'loading') {
-    return (
-      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
-        <p className="text-gray-400 text-sm">{MSG.common.loading}</p>
-      </div>
-    )
-  }
+  if (pageState === 'loading') return <LoadingScreen />
 
   if (pageState === 'error') {
     return (
@@ -72,25 +67,22 @@ export function ShareLinkPage() {
           <p className="text-sm text-gray-600 break-all">{roomUrl}</p>
         </div>
 
-        <motion.button
+        <MotionButton
           onClick={handleCopy}
-          whileTap={{ scale: 0.95 }}
+          variant={copied ? 'primary' : 'secondary'}
           className={`w-full py-3 rounded-xl text-base font-bold shadow-sm transition-all mb-4 ${
-            copied
-              ? 'bg-green-500 text-white'
-              : 'bg-white border border-primary text-primary hover:bg-primary/10'
+            copied ? 'bg-green-500 border-green-500' : 'border-primary text-primary hover:bg-primary/10'
           }`}
         >
           {copied ? MSG.shareLink.copied : MSG.shareLink.copy}
-        </motion.button>
+        </MotionButton>
 
-        <motion.button
+        <MotionButton
           onClick={() => navigate(`/${roomId}`)}
-          whileTap={{ scale: 0.95 }}
-          className="w-full py-4 rounded-xl bg-primary text-white text-base font-bold shadow-md hover:bg-primary-dark active:bg-primary-darker transition-colors"
+          className="w-full py-4 rounded-xl text-base font-bold shadow-md transition-colors"
         >
           {MSG.shareLink.enterRoom}
-        </motion.button>
+        </MotionButton>
       </div>
     </div>
   )

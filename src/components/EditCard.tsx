@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { ClipboardPaste } from 'lucide-react'
 import type { Member } from '../types'
 import { MSG } from '../lib/messages'
+import { validateTitle, validateAmount, validatePayPayUrl } from '../lib/validators'
 
 type FormErrors = {
   title?: string
@@ -23,34 +24,6 @@ type Props = {
   initialData?: InitialData
   members?: [Member, Member] | null
   isNew?: boolean
-}
-
-function validateTitle(value: string): string | undefined {
-  if (value.trim() === '') return MSG.validation.titleRequired
-  if (value.length > 20) return MSG.validation.titleMaxLength
-  return undefined
-}
-
-function validateAmount(value: string): string | undefined {
-  if (value === '') return MSG.validation.amountRequired
-  if (!/^\d+$/.test(value)) return MSG.validation.amountNumericOnly
-  const num = parseInt(value, 10)
-  if (num < 1) return MSG.validation.amountMin
-  if (num >= 1000000) return MSG.validation.amountMax
-  return undefined
-}
-
-function validatePayPayUrl(value: string): string | undefined {
-  if (value === '') return undefined
-  try {
-    const url = new URL(value)
-    if (!url.hostname.endsWith('paypay.ne.jp')) {
-      return MSG.validation.payPayUrlDomain
-    }
-  } catch {
-    return MSG.validation.payPayUrlInvalid
-  }
-  return undefined
 }
 
 export function EditCard({ onSave, onCancel, initialData, members, isNew = false }: Props) {

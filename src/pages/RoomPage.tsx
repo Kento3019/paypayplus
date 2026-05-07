@@ -14,6 +14,7 @@ import { useRoom } from '../hooks/useRoom'
 import { usePayments } from '../hooks/usePayments'
 import { useBanner } from '../hooks/useBanner'
 import { NotFoundPage } from './NotFoundPage'
+import { LoadingScreen } from '../components/ui/LoadingScreen'
 import { MSG } from '../lib/messages'
 
 export function RoomPage() {
@@ -103,9 +104,7 @@ export function RoomPage() {
         <RoomHeader roomId={roomId} />
 
         {loading ? (
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <p className="text-gray-400 text-sm">{MSG.common.loading}</p>
-          </div>
+          <LoadingScreen />
         ) : isAdding || payments.length > 0 ? (
           <PaymentList
             payments={payments}
