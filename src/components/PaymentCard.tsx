@@ -124,7 +124,7 @@ export function PaymentCard({
       }
     },
     trackMouse: true,
-    preventScrollOnSwipe: true,
+    preventScrollOnSwipe: false,
   })
 
   function handleEditClick(e: React.MouseEvent) {
@@ -217,13 +217,13 @@ export function PaymentCard({
             className="shrink-0 rounded-l-lg"
             style={{ width: '4px', backgroundColor: borderColor }}
           />
-          <div className="flex-1 p-4 relative">
+          <div className="flex-1 p-4 relative min-w-0">
             {/* 未完了バッジ */}
             <div className="absolute top-2 right-2">
               <AlertCircle size={18} className="text-red-500" />
             </div>
 
-            <p className="font-medium text-amount text-base leading-tight pr-6">{payment.title}</p>
+            <p className="font-medium text-amount text-base leading-tight pr-6 line-clamp-2">{payment.title}</p>
 
             {/* 日時表示 */}
             <div className="mt-0.5 space-y-0.5">

@@ -195,29 +195,33 @@ export function EditCard({ onSave, onCancel, initialData, members, isNew = false
       </div>
 
       {members && (
-        <div className="mb-4">
-          <p className="text-sm text-gray-600 mb-2">誰が払う？</p>
-          <div className="flex gap-2">
-            {members.map((member) => {
-              const isSelected = creatorId === member.id
-              return (
-                <motion.button
-                  key={member.id}
-                  type="button"
-                  onClick={() => handleCreatorToggle(member.id)}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex-1 py-2 rounded-lg text-sm font-medium border transition-colors"
-                  style={
-                    isSelected
-                      ? { backgroundColor: member.color, borderColor: member.color, color: '#fff' }
-                      : { backgroundColor: '#fff', borderColor: '#d1d5db', color: '#374151' }
-                  }
-                >
-                  {member.name}
-                </motion.button>
-              )
-            })}
-          </div>
+        <div className="mb-4 flex flex-col gap-2">
+          <motion.button
+            type="button"
+            onClick={() => handleCreatorToggle(members[0].id)}
+            whileTap={{ scale: 0.95 }}
+            className="w-full py-2 rounded-lg text-sm font-medium border transition-colors whitespace-normal text-center"
+            style={
+              creatorId === members[0].id
+                ? { backgroundColor: members[1].color, borderColor: members[1].color, color: '#fff' }
+                : { backgroundColor: '#fff', borderColor: '#d1d5db', color: '#374151' }
+            }
+          >
+            {members[1].name}から{members[0].name}に支払う
+          </motion.button>
+          <motion.button
+            type="button"
+            onClick={() => handleCreatorToggle(members[1].id)}
+            whileTap={{ scale: 0.95 }}
+            className="w-full py-2 rounded-lg text-sm font-medium border transition-colors whitespace-normal text-center"
+            style={
+              creatorId === members[1].id
+                ? { backgroundColor: members[0].color, borderColor: members[0].color, color: '#fff' }
+                : { backgroundColor: '#fff', borderColor: '#d1d5db', color: '#374151' }
+            }
+          >
+            {members[0].name}から{members[1].name}に支払う
+          </motion.button>
         </div>
       )}
 

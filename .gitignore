@@ -17,8 +17,9 @@ test-results/
 specs_test/
 specs/screenshots/
 specs/*.json
-specs/*.cjs
+specs/*.*js
 specs/*.png
+specs/*.txt
 specs/*.ts
 specs/sprint-*.md
 
@@ -30,3 +31,4 @@ test-sprint*.cjs
 *.log
 
 .vercel
+
