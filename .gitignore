@@ -5,27 +5,16 @@ node_modules/
 dist/
 
 # Environment variables (secrets)
-.env
-.env.local
-.env.*.local
+.env*
 
 # Local Claude Code settings
 .claude/settings.local.json
 
 # Test artifacts
-test-results/
-specs_test/
-specs/screenshots/
-specs/*.json
-specs/*.*js
-specs/*.png
-specs/*.txt
-specs/*.ts
+specs/sprint-eval/*
+specs/sprint-report/*
 specs/sprint-*.md
 
-# Root-level temporary test/eval scripts
-sprint*-eval.test.ts
-test-sprint*.cjs
 
 # Log files
 *.log

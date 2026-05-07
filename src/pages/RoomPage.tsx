@@ -11,6 +11,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog'
 import { HistorySection } from '../components/HistorySection'
 import { navigateToHash } from '../lib/routing'
 import { AppLogo } from '../components/AppLogo'
+import { MSG } from '../lib/messages'
 
 type Props = {
   roomId: string
@@ -74,7 +75,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
 
   async function handleSaveAdd(data: { title: string; amount: number; payPayUrl: string | null; creatorId: string | null }) {
     if (!navigator.onLine) {
-      showBanner('通信エラーが発生しました', 'error')
+      showBanner(MSG.toast.networkError, 'error')
       return
     }
     try {
@@ -89,9 +90,9 @@ export function RoomPage({ roomId, onNotFound }: Props) {
         creatorId: data.creatorId,
       })
       setIsAdding(false)
-      showBanner('保存しました', 'save')
+      showBanner(MSG.toast.saved, 'save')
     } catch {
-      showBanner('通信エラーが発生しました', 'error')
+      showBanner(MSG.toast.networkError, 'error')
     }
   }
 
@@ -110,7 +111,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
 
   async function handleConfirmComplete() {
     if (!navigator.onLine) {
-      showBanner('通信エラーが発生しました', 'error')
+      showBanner(MSG.toast.networkError, 'error')
       return
     }
     if (!pendingCompletePayment) return
@@ -125,14 +126,14 @@ export function RoomPage({ roomId, onNotFound }: Props) {
           isDone: true,
           completedAt: new Date(),
         })
-        showBanner('完了しました', 'complete')
+        showBanner(MSG.toast.completed, 'complete')
       } catch {
         setFadingOutIds((prev) => {
           const next = new Set(prev)
           next.delete(target.id)
           return next
         })
-        showBanner('通信エラーが発生しました', 'error')
+        showBanner(MSG.toast.networkError, 'error')
       }
     }, 350)
   }
@@ -154,7 +155,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
     data: { title: string; amount: number; payPayUrl: string | null; creatorId: string | null }
   ) {
     if (!navigator.onLine) {
-      showBanner('通信エラーが発生しました', 'error')
+      showBanner(MSG.toast.networkError, 'error')
       return
     }
     try {
@@ -165,9 +166,9 @@ export function RoomPage({ roomId, onNotFound }: Props) {
         creatorId: data.creatorId,
       })
       setEditingId(null)
-      showBanner('保存しました', 'save')
+      showBanner(MSG.toast.saved, 'save')
     } catch {
-      showBanner('通信エラーが発生しました', 'error')
+      showBanner(MSG.toast.networkError, 'error')
     }
   }
 
@@ -177,7 +178,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
 
   async function handleConfirmDelete() {
     if (!navigator.onLine) {
-      showBanner('通信エラーが発生しました', 'error')
+      showBanner(MSG.toast.networkError, 'error')
       return
     }
     if (!pendingDeletePayment) return
@@ -189,14 +190,14 @@ export function RoomPage({ roomId, onNotFound }: Props) {
     setTimeout(async () => {
       try {
         await deletePayment(roomId, target.id)
-        showBanner('削除しました', 'delete')
+        showBanner(MSG.toast.deleted, 'delete')
       } catch {
         setFadingOutIds((prev) => {
           const next = new Set(prev)
           next.delete(target.id)
           return next
         })
-        showBanner('通信エラーが発生しました', 'error')
+        showBanner(MSG.toast.networkError, 'error')
       }
     }, 350)
   }
@@ -219,14 +220,14 @@ export function RoomPage({ roomId, onNotFound }: Props) {
               navigateToHash(`settings/${roomId}`)
             }}
             className="text-gray-500 hover:text-gray-700 p-1"
-            aria-label="設定"
+            aria-label={MSG.room.settingsLabel}
           >
             <Settings size={22} />
           </motion.button>
         </div>
         {loading ? (
           <div className="flex items-center justify-center min-h-[60vh]">
-            <p className="text-gray-400 text-sm">読み込み中...</p>
+            <p className="text-gray-400 text-sm">{MSG.common.loading}</p>
           </div>
         ) : (
           <>
@@ -289,14 +290,14 @@ export function RoomPage({ roomId, onNotFound }: Props) {
                 <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-5">
                   <Wallet size={40} className="text-primary" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-700 mb-2">立替を記録しよう</h3>
+                <h3 className="text-lg font-bold text-gray-700 mb-2">{MSG.room.emptyTitle}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed mb-6">
-                  右下の<span className="font-bold text-primary">＋ボタン</span>をタップして、
-                  <br />最初の立替を追加しましょう
+                  {MSG.room.emptyDescPrefix}<span className="font-bold text-primary">{MSG.room.emptyDescHighlight}</span>{MSG.room.emptyDescSuffix}
+                  <br />{MSG.room.emptyDescLine2}
                 </p>
                 <div className="flex items-center gap-2 text-xs text-gray-400">
                   <ArrowDownRight size={14} />
-                  <span>下の＋ボタンから追加</span>
+                  <span>{MSG.room.emptyHint}</span>
                 </div>
               </motion.div>
             )}
@@ -318,7 +319,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
             ? 'opacity-40 cursor-not-allowed'
             : 'hover:bg-primary-dark active:bg-primary-darker'
         }`}
-        aria-label="支払いを追加"
+        aria-label={MSG.room.fabLabel}
       >
         <Plus size={28} />
       </motion.button>
@@ -327,7 +328,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
 
       {pendingCompletePayment && (
         <ConfirmDialog
-          message="支払い完了しましたか？"
+          message={MSG.dialog.completeConfirm}
           onConfirm={handleConfirmComplete}
           onCancel={handleCancelComplete}
         />
@@ -335,7 +336,7 @@ export function RoomPage({ roomId, onNotFound }: Props) {
 
       {pendingDeletePayment && (
         <ConfirmDialog
-          message="削除しますか？"
+          message={MSG.dialog.deleteConfirm}
           onConfirm={handleConfirmDelete}
           onCancel={handleCancelDelete}
         />

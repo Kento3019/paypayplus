@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Wallet, Check, PlusCircle, Share2, ListPlus, ChevronRight } from 'lucide-react'
 import { navigateToHash } from '../lib/routing'
 import { AppLogo } from '../components/AppLogo'
+import { MSG } from '../lib/messages'
 
 export function WelcomePage() {
   function handleCreateRoom() {
@@ -39,7 +40,7 @@ export function WelcomePage() {
           className="mb-4 text-center"
         >
           <h1 className="text-2xl font-bold text-gray-800 whitespace-pre-line">
-            {'2人の支払いを\nかんたん管理'}
+            {MSG.welcome.headline}
           </h1>
         </motion.div>
 
@@ -51,15 +52,15 @@ export function WelcomePage() {
         >
           <div className="flex items-center gap-3">
             <Check size={16} className="text-primary flex-shrink-0" />
-            <span className="text-sm text-gray-700">ログイン不要・URLを共有するだけ</span>
+            <span className="text-sm text-gray-700">{MSG.welcome.feature1}</span>
           </div>
           <div className="flex items-center gap-3">
             <Check size={16} className="text-primary flex-shrink-0" />
-            <span className="text-sm text-gray-700">誰が払ったかひと目でわかる</span>
+            <span className="text-sm text-gray-700">{MSG.welcome.feature2}</span>
           </div>
           <div className="flex items-center gap-3">
             <Check size={16} className="text-primary flex-shrink-0" />
-            <span className="text-sm text-gray-700">PayPayリンクを記録できる</span>
+            <span className="text-sm text-gray-700">{MSG.welcome.feature3}</span>
           </div>
         </motion.div>
 
@@ -70,13 +71,13 @@ export function WelcomePage() {
           className="w-full mb-4"
         >
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center mb-3">
-            使い方
+            {MSG.welcome.howToUse}
           </p>
           <div className="flex items-start justify-between gap-1">
             {[
-              { icon: PlusCircle, title: 'ルーム作成', desc: '「作る」ボタンをタップ' },
-              { icon: Share2, title: 'URLを共有', desc: 'メンバーにURLを送る' },
-              { icon: ListPlus, title: '立替を記録', desc: '＋ボタンで追加する' },
+              { icon: PlusCircle, title: MSG.welcome.step1Title, desc: MSG.welcome.step1Desc },
+              { icon: Share2, title: MSG.welcome.step2Title, desc: MSG.welcome.step2Desc },
+              { icon: ListPlus, title: MSG.welcome.step3Title, desc: MSG.welcome.step3Desc },
             ].map(({ icon: Icon, title, desc }, i) => (
               <div key={i} className="flex items-start gap-1 flex-1">
                 <div className="flex flex-col items-center flex-1">
@@ -108,11 +109,11 @@ export function WelcomePage() {
             whileTap={{ scale: 0.95 }}
             className="w-full py-4 rounded-xl bg-primary text-white text-base font-bold shadow-md hover:bg-primary-dark active:bg-primary-darker transition-colors"
           >
-            新しいルームを作る
+            {MSG.welcome.createButton}
           </motion.button>
 
           <p className="mt-4 text-sm text-gray-400 leading-relaxed text-center">
-            ルームのURLを受け取ったらそのままアクセスしてね
+            {MSG.welcome.shareHint}
           </p>
         </motion.div>
 

@@ -1,3 +1,5 @@
+import { MSG } from '../lib/messages'
+
 type Props = {
   message: string
   onConfirm: () => void
@@ -21,14 +23,14 @@ export function ConfirmDialog({ message, onConfirm, onCancel }: Props) {
             onClick={onCancel}
             className="flex-1 py-2.5 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50"
           >
-            いいえ
+            {MSG.common.no}
           </button>
           <button
             type="button"
             onClick={onConfirm}
             className="flex-1 py-2.5 rounded-lg bg-green-500 text-white text-sm font-medium hover:bg-green-600"
           >
-            はい
+            {MSG.common.yes}
           </button>
         </div>
       </div>

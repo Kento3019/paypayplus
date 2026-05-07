@@ -5,6 +5,7 @@ import { getRoom, updateRoom } from '../lib/firestore'
 import type { Member } from '../types'
 import { navigateToHash } from '../lib/routing'
 import { AppLogo } from '../components/AppLogo'
+import { MSG } from '../lib/messages'
 
 type Props = {
   roomId: string
@@ -34,8 +35,8 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
   }, [roomId, onNotFound])
 
   function validateName(value: string): string | undefined {
-    if (value.trim() === '') return '名前を入力してください'
-    if (value.length > 10) return '名前は10文字以内で入力してください'
+    if (value.trim() === '') return MSG.validation.nameRequired
+    if (value.length > 10) return MSG.validation.nameMaxLength
     return undefined
   }
 
@@ -62,7 +63,7 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
   if (loading) {
     return (
       <div className="min-h-[100dvh] bg-background flex items-center justify-center">
-        <p className="text-gray-400 text-sm">読み込み中...</p>
+        <p className="text-gray-400 text-sm">{MSG.common.loading}</p>
       </div>
     )
   }
@@ -76,16 +77,16 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
             onClick={() => navigateToHash(roomId)}
             whileTap={{ scale: 0.95 }}
             className="text-gray-600 hover:text-gray-900"
-            aria-label="戻る"
+            aria-label={MSG.common.back}
           >
             <ArrowLeft size={24} />
           </motion.button>
-          <h1 className="text-lg font-semibold text-gray-800">メンバーを編集</h1>
+          <h1 className="text-lg font-semibold text-gray-800">{MSG.settings.title}</h1>
         </div>
 
         <div className="bg-white rounded-lg p-4 shadow-sm space-y-4">
           <div>
-            <label className="block text-sm text-gray-600 mb-1">メンバー1の名前</label>
+            <label className="block text-sm text-gray-600 mb-1">{MSG.settings.member1Label}</label>
             <input
               type="text"
               value={name1}
@@ -102,7 +103,7 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-1">メンバー2の名前</label>
+            <label className="block text-sm text-gray-600 mb-1">{MSG.settings.member2Label}</label>
             <input
               type="text"
               value={name2}
@@ -125,7 +126,7 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
             whileTap={{ scale: 0.95 }}
             className="w-full py-3 rounded-lg bg-primary text-white font-medium hover:bg-primary-dark active:bg-primary-darker disabled:opacity-50"
           >
-            {saving ? '保存中...' : '保存する'}
+            {saving ? MSG.common.saving : MSG.settings.saveButton}
           </motion.button>
         </div>
       </div>

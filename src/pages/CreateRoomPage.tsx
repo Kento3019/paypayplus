@@ -6,6 +6,7 @@ import { Toast, createToast } from '../components/Toast'
 import type { ToastMessage } from '../components/Toast'
 import type { Member } from '../types'
 import { AppLogo } from '../components/AppLogo'
+import { MSG } from '../lib/messages'
 
 type FormErrors = {
   member1?: string
@@ -29,8 +30,8 @@ export function CreateRoomPage() {
 
   function validate(): FormErrors {
     const errs: FormErrors = {}
-    if (member1Name.trim() === '') errs.member1 = '名前を入力してください'
-    if (member2Name.trim() === '') errs.member2 = '名前を入力してください'
+    if (member1Name.trim() === '') errs.member1 = MSG.validation.nameRequired
+    if (member2Name.trim() === '') errs.member2 = MSG.validation.nameRequired
     return errs
   }
 
@@ -50,7 +51,7 @@ export function CreateRoomPage() {
       navigateToHash(`share/${roomId}`)
     } catch {
       setCreating(false)
-      showToast('通信エラーが発生しました', 'error')
+      showToast(MSG.toast.networkError, 'error')
     }
   }
 
@@ -59,11 +60,11 @@ export function CreateRoomPage() {
       <Toast toasts={toasts} onDismiss={dismissToast} />
       <div className="w-full max-w-sm">
         <AppLogo size="sm" className="mb-4" />
-        <h1 className="text-2xl font-bold text-gray-800 mb-8 text-center">ルームを作成</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-8 text-center">{MSG.createRoom.title}</h1>
 
         <div className="mb-5">
           <label className="block text-sm font-medium text-gray-600 mb-2">
-            メンバー1の名前
+            {MSG.createRoom.member1Label}
           </label>
           <input
             type="text"
@@ -73,7 +74,7 @@ export function CreateRoomPage() {
               if (errors.member1) setErrors((prev) => ({ ...prev, member1: undefined }))
             }}
             maxLength={10}
-            placeholder="太郎"
+            placeholder={MSG.createRoom.member1Placeholder}
             className={`w-full border rounded-lg px-4 py-3 text-base outline-none focus:ring-2 focus:ring-primary/50 bg-white ${
               errors.member1 ? 'border-red-500' : 'border-gray-300'
             }`}
@@ -85,7 +86,7 @@ export function CreateRoomPage() {
 
         <div className="mb-8">
           <label className="block text-sm font-medium text-gray-600 mb-2">
-            メンバー2の名前
+            {MSG.createRoom.member2Label}
           </label>
           <input
             type="text"
@@ -95,7 +96,7 @@ export function CreateRoomPage() {
               if (errors.member2) setErrors((prev) => ({ ...prev, member2: undefined }))
             }}
             maxLength={10}
-            placeholder="花子"
+            placeholder={MSG.createRoom.member2Placeholder}
             className={`w-full border rounded-lg px-4 py-3 text-base outline-none focus:ring-2 focus:ring-primary/50 bg-white ${
               errors.member2 ? 'border-red-500' : 'border-gray-300'
             }`}
@@ -111,7 +112,7 @@ export function CreateRoomPage() {
           whileTap={{ scale: 0.95 }}
           className="w-full py-4 rounded-xl bg-primary text-white text-base font-bold shadow-md hover:bg-primary-dark active:bg-primary-darker transition-colors disabled:opacity-50"
         >
-          {creating ? '作成中...' : 'ルームを作成する'}
+          {creating ? MSG.createRoom.creating : MSG.createRoom.createButton}
         </motion.button>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ClipboardPaste } from 'lucide-react'
 import type { Member } from '../types'
+import { MSG } from '../lib/messages'
 
 type FormErrors = {
   title?: string
@@ -25,17 +26,17 @@ type Props = {
 }
 
 function validateTitle(value: string): string | undefined {
-  if (value.trim() === '') return 'タイトルを入力してください'
-  if (value.length > 20) return 'タイトルは20文字以内で入力してください'
+  if (value.trim() === '') return MSG.validation.titleRequired
+  if (value.length > 20) return MSG.validation.titleMaxLength
   return undefined
 }
 
 function validateAmount(value: string): string | undefined {
-  if (value === '') return '金額を入力してください'
-  if (!/^\d+$/.test(value)) return '金額は数字のみ入力してください'
+  if (value === '') return MSG.validation.amountRequired
+  if (!/^\d+$/.test(value)) return MSG.validation.amountNumericOnly
   const num = parseInt(value, 10)
-  if (num < 1) return '金額は1以上を入力してください'
-  if (num >= 1000000) return '金額は999,999以下を入力してください'
+  if (num < 1) return MSG.validation.amountMin
+  if (num >= 1000000) return MSG.validation.amountMax
   return undefined
 }
 
@@ -44,10 +45,10 @@ function validatePayPayUrl(value: string): string | undefined {
   try {
     const url = new URL(value)
     if (!url.hostname.endsWith('paypay.ne.jp')) {
-      return 'paypay.ne.jpのURLを入力してください'
+      return MSG.validation.payPayUrlDomain
     }
   } catch {
-    return '正しいURLを入力してください'
+    return MSG.validation.payPayUrlInvalid
   }
   return undefined
 }
@@ -132,11 +133,10 @@ export function EditCard({ onSave, onCancel, initialData, members, isNew = false
             }
           }}
           maxLength={20}
-          placeholder="タイトル"
+          placeholder={MSG.editCard.titlePlaceholder}
           autoFocus
-          className={`w-full border rounded px-3 py-2 text-base outline-none focus:ring-2 focus:ring-blue-400 ${
-            errors.title ? 'border-red-500' : 'border-gray-300'
-          }`}
+          className={`w-full border rounded px-3 py-2 text-base outline-none focus:ring-2 focus:ring-blue-400 ${errors.title ? 'border-red-500' : 'border-gray-300'
+            }`}
         />
         {errors.title && (
           <p className="text-red-500 text-xs mt-1">{errors.title}</p>
@@ -144,9 +144,8 @@ export function EditCard({ onSave, onCancel, initialData, members, isNew = false
       </div>
 
       <div className="mb-3">
-        <div className={`flex items-center border rounded px-3 py-2 focus-within:ring-2 focus-within:ring-blue-400 ${
-          errors.amount ? 'border-red-500' : 'border-gray-300'
-        }`}>
+        <div className={`flex items-center border rounded px-3 py-2 focus-within:ring-2 focus-within:ring-blue-400 ${errors.amount ? 'border-red-500' : 'border-gray-300'
+          }`}>
           <span className="text-gray-500 mr-1">¥</span>
           <input
             type="text"
@@ -169,9 +168,8 @@ export function EditCard({ onSave, onCancel, initialData, members, isNew = false
       </div>
 
       <div className="mb-4">
-        <div className={`flex items-center border rounded focus-within:ring-2 focus-within:ring-blue-400 ${
-          errors.payPayUrl ? 'border-red-500' : 'border-gray-300'
-        }`}>
+        <div className={`flex items-center border rounded focus-within:ring-2 focus-within:ring-blue-400 ${errors.payPayUrl ? 'border-red-500' : 'border-gray-300'
+          }`}>
           <input
             type="url"
             value={payPayUrl}
@@ -184,7 +182,7 @@ export function EditCard({ onSave, onCancel, initialData, members, isNew = false
             onClick={handlePaste}
             whileTap={{ scale: 0.95 }}
             className="px-3 py-2 border-l border-gray-300 text-gray-500 hover:bg-gray-50 shrink-0 flex items-center justify-center"
-            title="クリップボードから貼り付け"
+            title={MSG.editCard.pasteTip}
           >
             <ClipboardPaste size={20} />
           </motion.button>
@@ -207,7 +205,7 @@ export function EditCard({ onSave, onCancel, initialData, members, isNew = false
                 : { backgroundColor: '#fff', borderColor: '#d1d5db', color: '#374151' }
             }
           >
-            {members[1].name}から{members[0].name}に支払う
+            {MSG.editCard.payDirectionFn(members[1].name, members[0].name)}
           </motion.button>
           <motion.button
             type="button"
@@ -220,7 +218,7 @@ export function EditCard({ onSave, onCancel, initialData, members, isNew = false
                 : { backgroundColor: '#fff', borderColor: '#d1d5db', color: '#374151' }
             }
           >
-            {members[0].name}から{members[1].name}に支払う
+            {MSG.editCard.payDirectionFn(members[0].name, members[1].name)}
           </motion.button>
         </div>
       )}
@@ -233,7 +231,7 @@ export function EditCard({ onSave, onCancel, initialData, members, isNew = false
           whileTap={{ scale: 0.95 }}
           className="flex-1 py-2 rounded-lg border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 disabled:opacity-50"
         >
-          キャンセル
+          {MSG.common.cancel}
         </motion.button>
         <motion.button
           type="button"
@@ -242,7 +240,7 @@ export function EditCard({ onSave, onCancel, initialData, members, isNew = false
           whileTap={{ scale: 0.95 }}
           className="flex-1 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 disabled:opacity-50"
         >
-          {saving ? '保存中...' : '保存'}
+          {saving ? MSG.common.saving : MSG.common.save}
         </motion.button>
       </div>
     </motion.div>

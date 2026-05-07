@@ -4,6 +4,7 @@ import { getRoom } from '../lib/firestore'
 import { navigateToHash } from '../lib/routing'
 import { NotFoundPage } from './NotFoundPage'
 import { AppLogo } from '../components/AppLogo'
+import { MSG } from '../lib/messages'
 
 type Props = {
   roomId: string
@@ -53,7 +54,7 @@ export function ShareLinkPage({ roomId }: Props) {
   if (loading) {
     return (
       <div className="min-h-[100dvh] bg-background flex items-center justify-center">
-        <p className="text-gray-400 text-sm">読み込み中...</p>
+        <p className="text-gray-400 text-sm">{MSG.common.loading}</p>
       </div>
     )
   }
@@ -63,8 +64,8 @@ export function ShareLinkPage({ roomId }: Props) {
       <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-sm text-center">
           <p className="text-4xl mb-4">⚠️</p>
-          <h1 className="text-xl font-bold text-gray-800 mb-2">このルームにアクセスできません</h1>
-          <p className="text-sm text-gray-500">通信エラーが発生しました。時間をおいて再度お試しください。</p>
+          <h1 className="text-xl font-bold text-gray-800 mb-2">{MSG.shareLink.accessError}</h1>
+          <p className="text-sm text-gray-500">{MSG.shareLink.accessErrorDetail}</p>
         </div>
       </div>
     )
@@ -78,8 +79,8 @@ export function ShareLinkPage({ roomId }: Props) {
     <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm text-center">
         <AppLogo size="sm" className="mb-4" />
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">URLを共有してね</h1>
-        <p className="text-sm text-gray-500 mb-8">このURLをメンバーに共有してね</p>
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">{MSG.shareLink.title}</h1>
+        <p className="text-sm text-gray-500 mb-8">{MSG.shareLink.subtitle}</p>
 
         <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-left">
           <p className="text-sm text-gray-600 break-all">{roomUrl}</p>
@@ -94,7 +95,7 @@ export function ShareLinkPage({ roomId }: Props) {
               : 'bg-white border border-primary text-primary hover:bg-primary/10'
           }`}
         >
-          {copied ? 'コピーした！ ✓' : 'コピー'}
+          {copied ? MSG.shareLink.copied : MSG.shareLink.copy}
         </motion.button>
 
         <motion.button
@@ -102,7 +103,7 @@ export function ShareLinkPage({ roomId }: Props) {
           whileTap={{ scale: 0.95 }}
           className="w-full py-4 rounded-xl bg-primary text-white text-base font-bold shadow-md hover:bg-primary-dark active:bg-primary-darker transition-colors"
         >
-          ルームへ入る
+          {MSG.shareLink.enterRoom}
         </motion.button>
       </div>
     </div>

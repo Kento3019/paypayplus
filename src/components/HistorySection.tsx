@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { MSG } from '../lib/messages'
 import { CircleCheckBig, ChevronDown } from 'lucide-react'
 import type { Payment, Member } from '../types'
 import { classifyPayment, formatAmount, formatCompletedDate } from '../lib/dateUtils'
@@ -17,9 +18,9 @@ type SectionConfig = {
 }
 
 const SECTIONS: SectionConfig[] = [
-  { key: 'thisWeek', label: '今週（月曜〜）', defaultOpen: true },
-  { key: 'thisMonth', label: '今月（今週除く）', defaultOpen: false },
-  { key: 'earlier', label: 'それ以前', defaultOpen: false },
+  { key: 'thisWeek', label: MSG.history.thisWeek, defaultOpen: true },
+  { key: 'thisMonth', label: MSG.history.thisMonth, defaultOpen: false },
+  { key: 'earlier', label: MSG.history.earlier, defaultOpen: false },
 ]
 
 function formatDateTime(date: Date): string {
@@ -58,7 +59,7 @@ function CompletedCard({ payment, members }: { payment: Payment; members?: [Memb
       <div className="p-4 relative">
         {/* 右上: 完了バッジ */}
         <div className="absolute top-3 right-3 flex items-center gap-1">
-          <span className="text-xs text-green-600 font-medium">完了</span>
+          <span className="text-xs text-green-600 font-medium">{MSG.history.completedBadge}</span>
           <CircleCheckBig size={16} className="text-green-500" />
         </div>
 
@@ -67,9 +68,9 @@ function CompletedCard({ payment, members }: { payment: Payment; members?: [Memb
 
         {/* 日時 */}
         <div className="mt-0.5 space-y-0.5">
-          <p className="text-xs text-gray-400">作成: {formatDateTime(payment.createdAt)}</p>
+          <p className="text-xs text-gray-400">{MSG.paymentCard.createdAtFn(formatDateTime(payment.createdAt))}</p>
           {showUpdatedAt && (
-            <p className="text-xs text-gray-400">更新: {formatDateTime(payment.updatedAt!)}</p>
+            <p className="text-xs text-gray-400">{MSG.paymentCard.updatedAtFn(formatDateTime(payment.updatedAt!))}</p>
           )}
         </div>
 
@@ -81,7 +82,7 @@ function CompletedCard({ payment, members }: { payment: Payment; members?: [Memb
               <span style={{ color: creatorMember.color }}>{creatorMember.name}</span>
               <span className="text-gray-400 mx-1">→</span>
               <span style={{ color: otherMember.color }}>{otherMember.name}</span>
-              <span className="text-gray-400"> に支払い</span>
+              <span className="text-gray-400">{MSG.paymentCard.payDirectionSuffix}</span>
             </p>
             <div className="flex-1 h-px bg-gray-200" />
           </div>
@@ -95,7 +96,7 @@ function CompletedCard({ payment, members }: { payment: Payment; members?: [Memb
         {/* 完了日時 */}
         {payment.completedAt && (
           <p className="text-xs text-gray-400 text-right mt-2">
-            完了: {formatCompletedDate(payment.completedAt)}
+            {MSG.history.completedAtFn(formatCompletedDate(payment.completedAt))}
           </p>
         )}
       </div>
@@ -178,7 +179,7 @@ export function HistorySection({ payments, members }: Props) {
   return (
     <div className="mt-8">
       <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-        履歴
+        {MSG.history.sectionTitle}
       </h2>
       <div className="space-y-2">
         {SECTIONS.map(({ key, label }) => (

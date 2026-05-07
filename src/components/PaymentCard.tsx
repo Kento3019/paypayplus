@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useSwipeable } from 'react-swipeable'
 import { CircleCheckBig, SquarePen, Trash2, AlertCircle } from 'lucide-react'
 import type { Payment, Member } from '../types'
+import { MSG } from '../lib/messages'
 
 type Props = {
   payment: Payment
@@ -190,7 +191,7 @@ export function PaymentCard({
           onClick={rightSwipeOpen ? handleDeleteClick : undefined}
         >
           <Trash2 size={20} className="text-white" />
-          <span className="text-white text-xs">削除</span>
+          <span className="text-white text-xs">{MSG.paymentCard.delete}</span>
         </div>
         <div
           className="flex items-center justify-center select-none gap-1 flex-col"
@@ -198,7 +199,7 @@ export function PaymentCard({
           onClick={rightSwipeOpen ? handleEditClick : undefined}
         >
           <SquarePen size={20} className="text-white" />
-          <span className="text-white text-xs">編集</span>
+          <span className="text-white text-xs">{MSG.paymentCard.edit}</span>
         </div>
       </div>
 
@@ -227,9 +228,9 @@ export function PaymentCard({
 
             {/* 日時表示 */}
             <div className="mt-0.5 space-y-0.5">
-              <p className="text-xs text-gray-400">作成: {formatDateTime(payment.createdAt)}</p>
+              <p className="text-xs text-gray-400">{MSG.paymentCard.createdAtFn(formatDateTime(payment.createdAt))}</p>
               {showUpdatedAt && (
-                <p className="text-xs text-gray-400">更新: {formatDateTime(payment.updatedAt!)}</p>
+                <p className="text-xs text-gray-400">{MSG.paymentCard.updatedAtFn(formatDateTime(payment.updatedAt!))}</p>
               )}
             </div>
 
@@ -241,7 +242,7 @@ export function PaymentCard({
                   <span style={{ color: creatorMember.color }}>{creatorMember.name}</span>
                   <span className="text-gray-400 mx-1">→</span>
                   <span style={{ color: otherMember.color }}>{otherMember.name}</span>
-                  <span className="text-gray-400"> に支払い</span>
+                  <span className="text-gray-400">{MSG.paymentCard.payDirectionSuffix}</span>
                 </p>
                 <div className="flex-1 h-px bg-gray-200" />
               </div>
@@ -259,14 +260,14 @@ export function PaymentCard({
                 className="block w-full py-3 rounded-lg bg-paypay text-white text-center font-bold text-sm"
                 onClick={(e) => e.stopPropagation()}
               >
-                PayPayで払う
+                {MSG.paymentCard.payPayButton}
               </motion.a>
             ) : (
               <button
                 disabled
                 className="block w-full py-3 rounded-lg bg-gray-300 text-gray-400 text-center font-bold text-sm cursor-not-allowed"
               >
-                PayPayで払う
+                {MSG.paymentCard.payPayButton}
               </button>
             )}
           </div>
