@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import { createRoom } from '../lib/firestore'
-import { generateRandomHash, navigateToHash } from '../lib/routing'
+import { generateRandomHash } from '../lib/routing'
 import { Toast, createToast } from '../components/Toast'
 import type { ToastMessage } from '../components/Toast'
 import type { Member } from '../types'
@@ -14,6 +15,7 @@ type FormErrors = {
 }
 
 export function CreateRoomPage() {
+  const navigate = useNavigate()
   const [member1Name, setMember1Name] = useState('')
   const [member2Name, setMember2Name] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
@@ -48,7 +50,7 @@ export function CreateRoomPage() {
         { id: 'm2', name: member2Name.trim(), color: '#F44336' },
       ]
       await createRoom(roomId, members)
-      navigateToHash(`share/${roomId}`)
+      navigate(`/share/${roomId}`)
     } catch {
       setCreating(false)
       showToast(MSG.toast.networkError, 'error')

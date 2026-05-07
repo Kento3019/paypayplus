@@ -1,40 +1,30 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { useParams, useNavigate } from 'react-router-dom'
 import { getRoom } from '../lib/firestore'
-import { navigateToHash } from '../lib/routing'
 import { NotFoundPage } from './NotFoundPage'
 import { AppLogo } from '../components/AppLogo'
 import { MSG } from '../lib/messages'
 
-type Props = {
-  roomId: string
-}
+type PageState = 'loading' | 'ready' | 'not_found' | 'error'
 
-export function ShareLinkPage({ roomId }: Props) {
-  const [loading, setLoading] = useState(true)
-  const [exists, setExists] = useState(false)
-  const [loadError, setLoadError] = useState(false)
+export function ShareLinkPage() {
+  const { roomId = '' } = useParams<{ roomId: string }>()
+  const navigate = useNavigate()
+  const [pageState, setPageState] = useState<PageState>('loading')
   const [copied, setCopied] = useState(false)
 
-  const roomUrl = `${window.location.origin}/#${roomId}`
+  const roomUrl = `${window.location.origin}/#/share/${roomId}`
 
   useEffect(() => {
     getRoom(roomId)
-      .then((room) => {
-        setExists(room !== null)
-        setLoading(false)
-      })
-      .catch(() => {
-        setLoadError(true)
-        setLoading(false)
-      })
+      .then((room) => setPageState(room !== null ? 'ready' : 'not_found'))
+      .catch(() => setPageState('error'))
   }, [roomId])
 
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(roomUrl)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
     } catch {
       const ta = document.createElement('textarea')
       ta.value = roomUrl
@@ -42,16 +32,12 @@ export function ShareLinkPage({ roomId }: Props) {
       ta.select()
       document.execCommand('copy')
       document.body.removeChild(ta)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
     }
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
-  function handleEnterRoom() {
-    navigateToHash(roomId)
-  }
-
-  if (loading) {
+  if (pageState === 'loading') {
     return (
       <div className="min-h-[100dvh] bg-background flex items-center justify-center">
         <p className="text-gray-400 text-sm">{MSG.common.loading}</p>
@@ -59,7 +45,7 @@ export function ShareLinkPage({ roomId }: Props) {
     )
   }
 
-  if (loadError) {
+  if (pageState === 'error') {
     return (
       <div className="min-h-[100dvh] bg-background flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-sm text-center">
@@ -71,7 +57,7 @@ export function ShareLinkPage({ roomId }: Props) {
     )
   }
 
-  if (!exists) {
+  if (pageState === 'not_found') {
     return <NotFoundPage />
   }
 
@@ -99,7 +85,7 @@ export function ShareLinkPage({ roomId }: Props) {
         </motion.button>
 
         <motion.button
-          onClick={handleEnterRoom}
+          onClick={() => navigate(`/${roomId}`)}
           whileTap={{ scale: 0.95 }}
           className="w-full py-4 rounded-xl bg-primary text-white text-base font-bold shadow-md hover:bg-primary-dark active:bg-primary-darker transition-colors"
         >

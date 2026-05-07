@@ -1,30 +1,30 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { getRoom, updateRoom } from '../lib/firestore'
 import type { Member } from '../types'
-import { navigateToHash } from '../lib/routing'
 import { AppLogo } from '../components/AppLogo'
 import { MSG } from '../lib/messages'
+import { NotFoundPage } from './NotFoundPage'
 
-type Props = {
-  roomId: string
-  onNotFound: () => void
-}
+type FormErrors = { member1?: string; member2?: string }
 
-export function SettingsPage({ roomId, onNotFound }: Props) {
+export function SettingsPage() {
+  const { roomId = '' } = useParams<{ roomId: string }>()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
   const [saving, setSaving] = useState(false)
   const [name1, setName1] = useState('')
   const [name2, setName2] = useState('')
-  const [error1, setError1] = useState<string | undefined>()
-  const [error2, setError2] = useState<string | undefined>()
+  const [errors, setErrors] = useState<FormErrors>({})
   const [members, setMembers] = useState<[Member, Member] | null>(null)
 
   useEffect(() => {
     getRoom(roomId).then((room) => {
       if (!room) {
-        onNotFound()
+        setNotFound(true)
         return
       }
       setMembers(room.members)
@@ -32,7 +32,7 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
       setName2(room.members[1].name)
       setLoading(false)
     })
-  }, [roomId, onNotFound])
+  }, [roomId])
 
   function validateName(value: string): string | undefined {
     if (value.trim() === '') return MSG.validation.nameRequired
@@ -43,8 +43,7 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
   async function handleSave() {
     const e1 = validateName(name1)
     const e2 = validateName(name2)
-    setError1(e1)
-    setError2(e2)
+    setErrors({ member1: e1, member2: e2 })
     if (e1 || e2 || !members) return
 
     setSaving(true)
@@ -54,11 +53,13 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
         { ...members[1], name: name2.trim() },
       ]
       await updateRoom(roomId, updatedMembers)
-      navigateToHash(roomId)
+      navigate(`/${roomId}`)
     } catch {
       setSaving(false)
     }
   }
+
+  if (notFound) return <NotFoundPage />
 
   if (loading) {
     return (
@@ -74,7 +75,7 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
         <AppLogo size="sm" className="mb-4" />
         <div className="flex items-center gap-3 mb-6">
           <motion.button
-            onClick={() => navigateToHash(roomId)}
+            onClick={() => navigate(`/${roomId}`)}
             whileTap={{ scale: 0.95 }}
             className="text-gray-600 hover:text-gray-900"
             aria-label={MSG.common.back}
@@ -92,14 +93,14 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
               value={name1}
               onChange={(e) => {
                 setName1(e.target.value)
-                if (error1) setError1(validateName(e.target.value))
+                if (errors.member1) setErrors((prev) => ({ ...prev, member1: validateName(e.target.value) }))
               }}
               maxLength={10}
               className={`w-full border rounded px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary/50 ${
-                error1 ? 'border-red-500' : 'border-gray-300'
+                errors.member1 ? 'border-red-500' : 'border-gray-300'
               }`}
             />
-            {error1 && <p className="text-red-500 text-xs mt-1">{error1}</p>}
+            {errors.member1 && <p className="text-red-500 text-xs mt-1">{errors.member1}</p>}
           </div>
 
           <div>
@@ -109,14 +110,14 @@ export function SettingsPage({ roomId, onNotFound }: Props) {
               value={name2}
               onChange={(e) => {
                 setName2(e.target.value)
-                if (error2) setError2(validateName(e.target.value))
+                if (errors.member2) setErrors((prev) => ({ ...prev, member2: validateName(e.target.value) }))
               }}
               maxLength={10}
               className={`w-full border rounded px-3 py-2 text-base outline-none focus:ring-2 focus:ring-primary/50 ${
-                error2 ? 'border-red-500' : 'border-gray-300'
+                errors.member2 ? 'border-red-500' : 'border-gray-300'
               }`}
             />
-            {error2 && <p className="text-red-500 text-xs mt-1">{error2}</p>}
+            {errors.member2 && <p className="text-red-500 text-xs mt-1">{errors.member2}</p>}
           </div>
 
           <motion.button

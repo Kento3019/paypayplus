@@ -1,93 +1,47 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, Settings, Wallet, ArrowDownRight } from 'lucide-react'
-import { subscribeActivePayments, subscribeCompletedPayments, createPayment, updatePayment, deletePayment, getRoom } from '../lib/firestore'
-import type { Payment, Member } from '../types'
-import { PaymentCard } from '../components/PaymentCard'
-import { EditCard } from '../components/EditCard'
-import { Banner, createBanner } from '../components/Banner'
-import type { BannerMessage } from '../components/Banner'
+import { Plus } from 'lucide-react'
+import { useParams } from 'react-router-dom'
+import { createPayment, updatePayment, deletePayment } from '../lib/firestore'
+import type { Payment } from '../types'
+import { Banner } from '../components/Banner'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { HistorySection } from '../components/HistorySection'
-import { navigateToHash } from '../lib/routing'
-import { AppLogo } from '../components/AppLogo'
+import { RoomHeader } from '../components/room/RoomHeader'
+import { EmptyState } from '../components/room/EmptyState'
+import { PaymentList } from '../components/room/PaymentList'
+import { useRoom } from '../hooks/useRoom'
+import { usePayments } from '../hooks/usePayments'
+import { useBanner } from '../hooks/useBanner'
+import { NotFoundPage } from './NotFoundPage'
 import { MSG } from '../lib/messages'
 
-type Props = {
-  roomId: string
-  onNotFound?: () => void
-}
+export function RoomPage() {
+  const { roomId = '' } = useParams<{ roomId: string }>()
+  const { members, roomState } = useRoom(roomId)
+  const { payments, completedPayments, loading } = usePayments(roomId)
+  const { banners, showBanner, dismissBanner } = useBanner()
 
-export function RoomPage({ roomId, onNotFound }: Props) {
-  const [payments, setPayments] = useState<Payment[]>([])
-  const [completedPayments, setCompletedPayments] = useState<Payment[]>([])
-  const [loading, setLoading] = useState(true)
-  const [members, setMembers] = useState<[Member, Member] | null>(null)
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [banners, setBanners] = useState<BannerMessage[]>([])
   const [pendingCompletePayment, setPendingCompletePayment] = useState<Payment | null>(null)
   const [pendingDeletePayment, setPendingDeletePayment] = useState<Payment | null>(null)
   const [fadingOutIds, setFadingOutIds] = useState<Set<string>>(new Set())
-  const initialLoadDone = useRef(false)
 
-  useEffect(() => {
-    getRoom(roomId).then((room) => {
-      if (!room) {
-        onNotFound?.()
-        return
-      }
-      setMembers(room.members)
-    })
-  }, [roomId, onNotFound])
+  const isLocked = isAdding || editingId !== null
 
-  useEffect(() => {
-    const unsubscribeActive = subscribeActivePayments(roomId, (data) => {
-      setPayments(data)
-      setLoading(false)
-      initialLoadDone.current = true
-    })
-    const unsubscribeCompleted = subscribeCompletedPayments(roomId, (data) => {
-      setCompletedPayments(data)
-    })
-    return () => {
-      unsubscribeActive()
-      unsubscribeCompleted()
-    }
-  }, [roomId])
-
-  const dismissBanner = useCallback((id: number) => {
-    setBanners((prev) => prev.filter((b) => b.id !== id))
-  }, [])
-
-  function showBanner(message: string, type: 'save' | 'complete' | 'delete' | 'error' = 'save') {
-    setBanners((prev) => [...prev, createBanner(message, type)])
-  }
-
-  function handleFabClick() {
-    if (isAdding || editingId !== null) return
-    setIsAdding(true)
-  }
-
-  function handleCancelAdd() {
-    setIsAdding(false)
+  function handleOverlayClick() {
+    if (isAdding) setIsAdding(false)
+    if (editingId !== null) setEditingId(null)
   }
 
   async function handleSaveAdd(data: { title: string; amount: number; payPayUrl: string | null; creatorId: string | null }) {
-    if (!navigator.onLine) {
-      showBanner(MSG.toast.networkError, 'error')
-      return
-    }
+    if (!navigator.onLine) { showBanner(MSG.toast.networkError, 'error'); return }
     try {
       await createPayment(roomId, {
-        title: data.title,
-        amount: data.amount,
-        payPayUrl: data.payPayUrl,
-        createdAt: new Date(),
-        updatedAt: null,
-        completedAt: null,
-        isDone: false,
-        creatorId: data.creatorId,
+        title: data.title, amount: data.amount, payPayUrl: data.payPayUrl,
+        createdAt: new Date(), updatedAt: null, completedAt: null,
+        isDone: false, creatorId: data.creatorId,
       })
       setIsAdding(false)
       showBanner(MSG.toast.saved, 'save')
@@ -96,228 +50,91 @@ export function RoomPage({ roomId, onNotFound }: Props) {
     }
   }
 
-  function handleOverlayClick() {
-    if (isAdding) {
-      setIsAdding(false)
-    }
-    if (editingId !== null) {
+  async function handleSaveEdit(paymentId: string, data: { title: string; amount: number; payPayUrl: string | null; creatorId: string | null }) {
+    if (!navigator.onLine) { showBanner(MSG.toast.networkError, 'error'); return }
+    try {
+      await updatePayment(roomId, paymentId, { title: data.title, amount: data.amount, payPayUrl: data.payPayUrl, creatorId: data.creatorId })
       setEditingId(null)
+      showBanner(MSG.toast.saved, 'save')
+    } catch {
+      showBanner(MSG.toast.networkError, 'error')
     }
-  }
-
-  function handleCompleteRequest(payment: Payment) {
-    setPendingCompletePayment(payment)
   }
 
   async function handleConfirmComplete() {
-    if (!navigator.onLine) {
-      showBanner(MSG.toast.networkError, 'error')
-      return
-    }
+    if (!navigator.onLine) { showBanner(MSG.toast.networkError, 'error'); return }
     if (!pendingCompletePayment) return
     const target = pendingCompletePayment
     setPendingCompletePayment(null)
-
     setFadingOutIds((prev) => new Set(prev).add(target.id))
-
     setTimeout(async () => {
       try {
-        await updatePayment(roomId, target.id, {
-          isDone: true,
-          completedAt: new Date(),
-        })
+        await updatePayment(roomId, target.id, { isDone: true, completedAt: new Date() })
         showBanner(MSG.toast.completed, 'complete')
       } catch {
-        setFadingOutIds((prev) => {
-          const next = new Set(prev)
-          next.delete(target.id)
-          return next
-        })
+        setFadingOutIds((prev) => { const next = new Set(prev); next.delete(target.id); return next })
         showBanner(MSG.toast.networkError, 'error')
       }
     }, 350)
   }
 
-  function handleCancelComplete() {
-    setPendingCompletePayment(null)
-  }
-
-  function handleEditRequest(payment: Payment) {
-    setEditingId(payment.id)
-  }
-
-  function handleCancelEdit() {
-    setEditingId(null)
-  }
-
-  async function handleSaveEdit(
-    paymentId: string,
-    data: { title: string; amount: number; payPayUrl: string | null; creatorId: string | null }
-  ) {
-    if (!navigator.onLine) {
-      showBanner(MSG.toast.networkError, 'error')
-      return
-    }
-    try {
-      await updatePayment(roomId, paymentId, {
-        title: data.title,
-        amount: data.amount,
-        payPayUrl: data.payPayUrl,
-        creatorId: data.creatorId,
-      })
-      setEditingId(null)
-      showBanner(MSG.toast.saved, 'save')
-    } catch {
-      showBanner(MSG.toast.networkError, 'error')
-    }
-  }
-
-  function handleDeleteRequest(payment: Payment) {
-    setPendingDeletePayment(payment)
-  }
-
   async function handleConfirmDelete() {
-    if (!navigator.onLine) {
-      showBanner(MSG.toast.networkError, 'error')
-      return
-    }
+    if (!navigator.onLine) { showBanner(MSG.toast.networkError, 'error'); return }
     if (!pendingDeletePayment) return
     const target = pendingDeletePayment
     setPendingDeletePayment(null)
-
     setFadingOutIds((prev) => new Set(prev).add(target.id))
-
     setTimeout(async () => {
       try {
         await deletePayment(roomId, target.id)
         showBanner(MSG.toast.deleted, 'delete')
       } catch {
-        setFadingOutIds((prev) => {
-          const next = new Set(prev)
-          next.delete(target.id)
-          return next
-        })
+        setFadingOutIds((prev) => { const next = new Set(prev); next.delete(target.id); return next })
         showBanner(MSG.toast.networkError, 'error')
       }
     }, 350)
   }
 
-  function handleCancelDelete() {
-    setPendingDeletePayment(null)
-  }
-
-  const isLocked = isAdding || editingId !== null
+  if (roomState === 'not_found') return <NotFoundPage />
 
   return (
     <div className="min-h-[100dvh] bg-background" onClick={handleOverlayClick}>
       <div className="max-w-md mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-4">
-          <AppLogo size="sm" />
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={(e) => {
-              e.stopPropagation()
-              navigateToHash(`settings/${roomId}`)
-            }}
-            className="text-gray-500 hover:text-gray-700 p-1"
-            aria-label={MSG.room.settingsLabel}
-          >
-            <Settings size={22} />
-          </motion.button>
-        </div>
+        <RoomHeader roomId={roomId} />
+
         {loading ? (
           <div className="flex items-center justify-center min-h-[60vh]">
             <p className="text-gray-400 text-sm">{MSG.common.loading}</p>
           </div>
+        ) : isAdding || payments.length > 0 ? (
+          <PaymentList
+            payments={payments}
+            members={members}
+            editingId={editingId}
+            isAdding={isAdding}
+            isLocked={isLocked}
+            fadingOutIds={fadingOutIds}
+            onCompleteRequest={setPendingCompletePayment}
+            onEditRequest={(p) => setEditingId(p.id)}
+            onDeleteRequest={setPendingDeletePayment}
+            onSaveAdd={handleSaveAdd}
+            onCancelAdd={() => setIsAdding(false)}
+            onSaveEdit={handleSaveEdit}
+            onCancelEdit={() => setEditingId(null)}
+          />
         ) : (
-          <>
-            {isAdding || payments.length > 0 ? (
-              <ul className="space-y-3">
-                {isAdding && (
-                  <li>
-                    <EditCard
-                      onSave={handleSaveAdd}
-                      onCancel={handleCancelAdd}
-                      members={members}
-                      isNew={true}
-                    />
-                  </li>
-                )}
-                {payments.map((payment, index) => (
-                  <li
-                    key={payment.id}
-                    className={
-                      isLocked && editingId !== payment.id
-                        ? 'pointer-events-none opacity-60'
-                        : ''
-                    }
-                  >
-                    {editingId === payment.id ? (
-                      <EditCard
-                        initialData={{
-                          title: payment.title,
-                          amount: payment.amount,
-                          payPayUrl: payment.payPayUrl,
-                          creatorId: payment.creatorId,
-                        }}
-                        onSave={(data) => handleSaveEdit(payment.id, data)}
-                        onCancel={handleCancelEdit}
-                        members={members}
-                        isNew={false}
-                      />
-                    ) : (
-                      <PaymentCard
-                        payment={payment}
-                        members={members}
-                        onCompleteRequest={handleCompleteRequest}
-                        onEditRequest={handleEditRequest}
-                        onDeleteRequest={handleDeleteRequest}
-                        disabled={isLocked}
-                        fadingOut={fadingOutIds.has(payment.id)}
-                        index={index}
-                      />
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
-                className="flex flex-col items-center text-center py-12 px-6"
-              >
-                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-5">
-                  <Wallet size={40} className="text-primary" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-700 mb-2">{MSG.room.emptyTitle}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed mb-6">
-                  {MSG.room.emptyDescPrefix}<span className="font-bold text-primary">{MSG.room.emptyDescHighlight}</span>{MSG.room.emptyDescSuffix}
-                  <br />{MSG.room.emptyDescLine2}
-                </p>
-                <div className="flex items-center gap-2 text-xs text-gray-400">
-                  <ArrowDownRight size={14} />
-                  <span>{MSG.room.emptyHint}</span>
-                </div>
-              </motion.div>
-            )}
-
-            <HistorySection payments={completedPayments} members={members} />
-          </>
+          <EmptyState />
         )}
+
+        <HistorySection payments={completedPayments} members={members} />
       </div>
 
       <motion.button
         whileTap={{ scale: 0.95 }}
-        onClick={(e) => {
-          e.stopPropagation()
-          handleFabClick()
-        }}
-        disabled={isAdding || editingId !== null || loading}
+        onClick={(e) => { e.stopPropagation(); if (!isLocked && !loading) setIsAdding(true) }}
+        disabled={isLocked || loading}
         className={`fixed bottom-6 right-6 w-14 h-14 rounded-full bg-primary text-white text-3xl shadow-lg flex items-center justify-center transition-opacity ${
-          isAdding || editingId !== null || loading
-            ? 'opacity-40 cursor-not-allowed'
-            : 'hover:bg-primary-dark active:bg-primary-darker'
+          isLocked || loading ? 'opacity-40 cursor-not-allowed' : 'hover:bg-primary-dark active:bg-primary-darker'
         }`}
         aria-label={MSG.room.fabLabel}
       >
@@ -327,19 +144,10 @@ export function RoomPage({ roomId, onNotFound }: Props) {
       <Banner banners={banners} onDismiss={dismissBanner} />
 
       {pendingCompletePayment && (
-        <ConfirmDialog
-          message={MSG.dialog.completeConfirm}
-          onConfirm={handleConfirmComplete}
-          onCancel={handleCancelComplete}
-        />
+        <ConfirmDialog message={MSG.dialog.completeConfirm} onConfirm={handleConfirmComplete} onCancel={() => setPendingCompletePayment(null)} />
       )}
-
       {pendingDeletePayment && (
-        <ConfirmDialog
-          message={MSG.dialog.deleteConfirm}
-          onConfirm={handleConfirmDelete}
-          onCancel={handleCancelDelete}
-        />
+        <ConfirmDialog message={MSG.dialog.deleteConfirm} onConfirm={handleConfirmDelete} onCancel={() => setPendingDeletePayment(null)} />
       )}
     </div>
   )

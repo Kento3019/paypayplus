@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion'
 import { Wallet, Check, PlusCircle, Share2, ListPlus, ChevronRight } from 'lucide-react'
-import { navigateToHash } from '../lib/routing'
+import { useNavigate } from 'react-router-dom'
 import { AppLogo } from '../components/AppLogo'
 import { MSG } from '../lib/messages'
 
 export function WelcomePage() {
+  const navigate = useNavigate()
+
   function handleCreateRoom() {
-    navigateToHash('create')
+    navigate('/create')
   }
 
   return (

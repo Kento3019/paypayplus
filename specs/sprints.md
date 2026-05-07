@@ -201,9 +201,9 @@
 
 - `Payment` 型に `creatorId` フィールドを追加
 - RoomPageでのルームメンバー情報読み込み
-- EditCardへの作成者セレクター追加（`## 21`）
-- PaymentCardへの作成者縁色・作成者名表示（`## 21`）
-- メンバー編集画面（`/#settings/{roomId}`）の実装（`## 23`）
+- EditCardへの作成者セレクター追加
+- PaymentCardへの作成者縁色・作成者名表示
+- メンバー編集画面（`/#settings/{roomId}`）の実装
 - RoomPageヘッダーに設定アイコン（`Settings`）追加
 - Firestoreセキュリティルール更新: `/rooms/{hashId}` 読込許可追加
 
@@ -222,13 +222,38 @@
 
 ---
 
+### Sprint 11: カード自動表示 + Framer Motion アニメーション
+
+**実装する機能**
+
+- 未完了0件時 新規カード自動表示
+- `framer-motion` 導入
+- 画面遷移アニメーション
+- カード追加・削除アニメーション（既存CSSからFramer Motionに移行）
+- ボタンタップアニメーション
+- アニメーション仕様の全実装
+
+**完了条件**
+
+- 未完了カード0件のとき新規カードフォームが自動展開される
+- 画面遷移にフェードインアニメーションがある（スライドなし）
+- カード追加時に下からスライドアップ + フェードインアニメーションがある
+- カード削除・完了時に右へスライドアウト + フェードアウトアニメーションがある
+- ボタンタップ時にスケール縮小アニメーションがある
+- ページ初期表示でカードがstaggered（順次）表示される
+- トーストが下からスライドアップ表示され、消去時スライドダウンする
+
+**想定工数**: M
+
+---
+
 ### Sprint 12: モバイルUI修正 + 支払い方向UI改善
 
 **実装する機能**
 
-- スマホ縦スクロール不可バグ修正（`## 24`）
-- スマホカード横オーバーフローバグ修正（`## 24`）
-- 「誰が払う？」ボタンを支払い方向表示に変更（`## 21`）
+- スマホ縦スクロール不可バグ修正
+- スマホカード横オーバーフローバグ修正
+- 「誰が払う？」ボタンを支払い方向表示に変更
 
 **完了条件**
 
@@ -243,25 +268,38 @@
 
 ---
 
-### Sprint 11: カード自動表示 + Framer Motion アニメーション
+### Sprint 13: React Router v6 + RoomPage分解 + 状態整理
 
 **実装する機能**
 
-- 未完了0件時 新規カード自動表示（`## 22`）
-- `framer-motion` 導入
-- 画面遷移アニメーション
-- カード追加・削除アニメーション（既存CSSからFramer Motionに移行）
-- ボタンタップアニメーション
-- `## 7. アニメーション` 全仕様の実装
+**13A: React Router v6 導入**
+- `react-router-dom` v6 インストール
+- `App.tsx` を `HashRouter` + `<Routes>` + `<Route>` に置き換え
+- `navigateToHash()` → `useNavigate()` フックに移行
+- `routing.ts` から `resolveRoute` / `getCurrentHash` 削除（`generateRandomHash` は残す）
+- 全ページの `navigateToHash()` 呼び出しを `useNavigate()` に変換
+
+**13B: RoomPage 分解 + カスタムフック**
+- `useRoom(roomId)` フック抽出（メンバー情報 + ルーム存在確認）
+- `usePayments(roomId)` フック抽出（`onSnapshot` 2本）
+- `useBanner()` フック抽出（バナー状態管理）
+- `<EmptyState />` コンポーネント抽出
+- `<PaymentList />` コンポーネント抽出（カードリスト + EditCard 切り替え）
+- `<RoomHeader />` コンポーネント抽出
+- early return パターンで `loading` / `empty` / `list` の条件分岐をフラット化
+
+**13C: ShareLinkPage / SettingsPage 状態整理**
+- `ShareLinkPage`: boolean 3本 → 判別共用体 `'loading' | 'ready' | 'not_found' | 'error'` 1本に統合
+- `SettingsPage`: `error1` / `error2` → `FormErrors` オブジェクトに統一
 
 **完了条件**
 
-- 未完了カード0件のとき新規カードフォームが自動展開される
-- 画面遷移にフェードインアニメーションがある（スライドなし）
-- カード追加時に下からスライドアップ + フェードインアニメーションがある
-- カード削除・完了時に右へスライドアウト + フェードアウトアニメーションがある
-- ボタンタップ時にスケール縮小アニメーションがある
-- ページ初期表示でカードがstaggered（順次）表示される
-- トーストが下からスライドアップ表示され、消去時スライドダウンする（`## 8`参照）
+- `/#create` / `/#share/xxx` / `/#settings/xxx` / `/#roomId` の全ルートが React Router 経由で動作する
+- 404ページが不正URLで表示される
+- `routing.ts` に `resolveRoute` / `getCurrentHash` が残っていない
+- `RoomPage.tsx` が 200行以下に収まる
+- `src/hooks/` ディレクトリに `useRoom`, `usePayments`, `useBanner` が存在する
+- `ShareLinkPage` の状態が判別共用体 1変数で管理されている
+- ビルドが通る（`npm run build` エラーなし）
 
-**想定工数**: M
+**想定工数**: L
